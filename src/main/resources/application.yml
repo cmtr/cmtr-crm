@@ -9,30 +9,29 @@ address:
     - POSTBOX
 
 
-billing:
-  account:
-    type:
-      - PRIVATE
-      - BUSINESS
-    customer:
-      onCreateGenerateBillingAccount: true
-      typeMapping:
-        - source: PRIVATE
-          target: PRIVATE
-        - source: BUSINESS
-          target: BUSINESS
-    owner:
-      typeMapping:
-        - source: PRIVATE
-          target: PERSON
-        - source: BUSINESS
-          target: BUSINESS
-    parameters:
-      efakturaId:
-        key: efakturaId
-        required: false
-        validation: regex
-        message: Incorrect E-Faktura Id format
+billingAccount:
+  type:
+    - PRIVATE
+    - BUSINESS
+  customer:
+    onCreateGenerateBillingAccount: true
+    typeMapping:
+      - source: PRIVATE
+        target: PRIVATE
+      - source: BUSINESS
+        target: BUSINESS
+  owner:
+    typeMapping:
+      - source: PRIVATE
+        target: PERSON
+      - source: BUSINESS
+        target: BUSINESS
+  parameters:
+    efakturaId:
+      key: efakturaId
+      required: false
+      validation: regex
+      message: Incorrect E-Faktura Id format
 
 
 contact:

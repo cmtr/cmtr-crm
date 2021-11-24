@@ -2,9 +2,8 @@ package io.cmtr.crm.customer.dto;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
-import io.cmtr.crm.billing.config.BillingProperties;
+import io.cmtr.crm.customer.config.BillingProperties;
 import io.cmtr.crm.customer.model.BillingAccount;
-import io.cmtr.crm.customer.model.BillingAccountType;
 import io.cmtr.crm.customer.model.Customer;
 import io.cmtr.crm.shared.contact.model.AbstractContact;
 import io.cmtr.crm.shared.generic.dto.EntityDtoValidator;
@@ -45,13 +44,9 @@ public class BillingAccountDeserializer extends GenericDeserializer<BillingAccou
                 .parse(type, customer, owner, recipient, parameters);
     }
 
-    private BillingAccountType getBillingAccountType(JsonNode node) {
-        return BillingAccountType
-                .valueOf(node
-                        .get("type")
-                        .textValue()
-                        .toUpperCase()
-                );
+    private String getBillingAccountType(JsonNode node) {
+        val type = node.get("type").toString().toUpperCase();
+        return type;
     }
 
     private Map<String, String> getBillingAccountParameters(JsonNode node) {

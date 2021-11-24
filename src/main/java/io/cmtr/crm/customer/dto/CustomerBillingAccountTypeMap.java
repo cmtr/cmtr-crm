@@ -1,6 +1,6 @@
 package io.cmtr.crm.customer.dto;
 
-import io.cmtr.crm.billing.config.BillingProperties;
+import io.cmtr.crm.customer.config.BillingProperties;
 import io.cmtr.crm.customer.model.BillingAccount;
 import io.cmtr.crm.customer.model.Customer;
 import io.cmtr.crm.shared.generic.dto.EntityTypeMap;

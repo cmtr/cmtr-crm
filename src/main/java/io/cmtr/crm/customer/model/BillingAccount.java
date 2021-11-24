@@ -39,7 +39,7 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
 
     // Should be fixed at entity instantiation time
     @NotNull(message = "Account type cannot be null")
-    private BillingAccountType type;
+    private String type;
 
     @Setter(AccessLevel.PUBLIC)
     private boolean barred;
@@ -159,7 +159,7 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
     }
 
     public static BillingAccount parse(
-            BillingAccountType type,
+            String type,
             Customer customer,
             AbstractContact owner,
             AbstractContact recipient,
