@@ -1,0 +1,78 @@
+package io.cmtr.crm.shared.contact.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import io.cmtr.crm.shared.generic.model.GenericEntity;
+import lombok.*;
+import lombok.experimental.Accessors;
+
+import javax.persistence.*;
+
+@Getter
+@Setter(AccessLevel.PROTECTED)
+@Accessors(chain = true)
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(
+                name = BusinessContact.DISCRIMINATOR_VALUE,
+                value = BusinessContact.class
+        ),
+        @JsonSubTypes.Type(
+                name = PersonContact.DISCRIMINATOR_VALUE,
+                value = PersonContact.class
+        )
+})
+@Entity
+@Table(name = "contacts")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(
+        name = "contact_type",
+        discriminatorType = DiscriminatorType.STRING
+)
+public abstract class AbstractContact implements GenericEntity<Long, AbstractContact> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @JsonIgnore
+    private Long id;
+
+    @Column(
+            name = "contact_type",
+            insertable = false,
+            updatable = false,
+            nullable = false
+    )
+    private String type;
+
+    // Person
+    private String firstName = "";
+    private String lastName = "";
+    // private Date dateOfBirth;
+
+    // Business
+    private String orgNr = "";
+    private String legalName = "";
+    private String countryCode = "";
+    private String businessName = "";
+
+    @OneToOne(
+            cascade = CascadeType.ALL,
+            optional = false,
+            orphanRemoval = true
+    )
+    private AbstractAddress address;
+
+    AbstractContact(String type) {
+        this.type = type;
+    }
+
+    @Override
+    public AbstractContact update(AbstractContact source) {
+        return this;
+    }
+}

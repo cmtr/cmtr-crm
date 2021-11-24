@@ -1,0 +1,427 @@
+openapi: 3.0.1
+info:
+  title: CMTr CRM
+  description: 'This is a CMTr CRM server.  You can find out more about CMTr
+    at [cmtr.io](https://cmtr.io)'
+  termsOfService: http://cmtr.io/terms/
+  contact:
+    email: contact@cmtr.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+externalDocs:
+  description: Find out more about CMTr CRM
+  url: http://cmtr.io
+servers:
+  - url: http://localhost:8080/api
+tags:
+  - name: customer
+    description: Everything about the customers
+    externalDocs:
+      description: Find out more
+      url: http://cmtr.io
+  - name: billing
+    description: Access to billing
+  - name: product
+    description: Everything about the products
+  - name: order
+    description: Everything about the orders
+  - name: user
+    description: Everything about the user
+
+paths:
+  /customer:
+    get:
+      tags:
+        - customer
+      summary: Retrieve existing customer
+      operationId: listCustomer
+      responses:
+        201:
+          $ref: '#/components/responses/Customer'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - customer
+      summary: Create new customer
+      operationId: createCustomer
+      requestBody:
+        $ref: '#/components/requestBodies/Customer'
+      responses:
+        201:
+          $ref: '#/components/responses/Customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+  /customer/{id}:
+    get:
+      tags:
+        - customer
+      summary: Retrieve existing customer
+      operationId: readCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        201:
+          $ref: '#/components/responses/Customer'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - customer
+      summary: Update existing customer
+      operationId: updateCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        $ref: '#/components/requestBodies/Customer'
+      responses:
+        201:
+          $ref: '#/components/responses/Customer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - customer
+      summary: Delete existing customer
+      operationId: deleteCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        204:
+          description: Success
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+  /billing/account:
+    get:
+      tags:
+        - billing
+      summary: Retrieve existing billing accounts
+      operationId: listBillingAccount
+      responses:
+        201:
+          $ref: '#/components/responses/BillingAccount'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - billing
+      summary: Create new billing account
+      operationId: createBillingAccount
+      requestBody:
+        $ref: '#/components/requestBodies/BillingAccount'
+      responses:
+        201:
+          $ref: '#/components/responses/BillingAccount'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+  /billing/account/{id}:
+    get:
+      tags:
+        - billing
+      summary: Retrieve existing billing account
+      operationId: readBillingAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        201:
+          $ref: '#/components/responses/BillingAccount'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - billing
+      summary: Update existing billing account
+      operationId: updateBillingAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      requestBody:
+        $ref: '#/components/requestBodies/BillingAccount'
+      responses:
+        201:
+          $ref: '#/components/responses/BillingAccount'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+    delete:
+      tags:
+        - billing
+      summary: Delete existing customer
+      operationId: deleteBillingAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: UUID
+      responses:
+        204:
+          description: Success
+          content: {}
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  responses:
+    Customer:
+      description: Customer Response
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/PrivateCustomer'
+              - $ref: '#/components/schemas/BusinessCustomer'
+            discriminator:
+              propertyName: type
+    BillingAccount:
+      description: Billing Account Response
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/BillingAccount'
+            discriminator:
+              propertyName: type
+    BadRequest:
+      description: The specified request was not valid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  requestBodies:
+    Customer:
+      description: customer request
+      required: true
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/PrivateCustomer'
+              - $ref: '#/components/schemas/BusinessCustomer'
+            discriminator:
+              propertyName: type
+    BillingAccount:
+      description: billing account request
+      required: true
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/BillingAccount'
+            discriminator:
+              propertyName: type
+  schemas:
+    Customer:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Customer Type
+          enum:
+            - PRIVATE
+            - BUSINESS
+        status:
+          type: string
+          enum:
+            - NEW
+            - ACTIVE
+            - INACTIVE
+            - CLOSED
+        barred:
+          type: boolean
+          default: false
+        email:
+          type: string
+          format: email
+        billingAccountIds:
+          type: array
+          items:
+            type: string
+    PrivateCustomer:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - type: object
+          properties:
+            customer:
+              $ref: '#/components/schemas/PersonContact'
+    BusinessCustomer:
+      allOf:
+        - $ref: '#/components/schemas/Customer'
+        - type: object
+          properties:
+            customer:
+              $ref: '#/components/schemas/BusinessContact'
+    BillingAccount:
+      type: object
+      properties:
+        customerId:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum:
+            - NEW
+            - ACTIVE
+            - INACTIVE
+            - CLOSED
+        type:
+          type: string
+          enum:
+            - BUSINESS
+            - PRIVATE
+        syncOwnerWithCustomer:
+          type: boolean
+          default: true
+        syncRecipientWithOwner:
+          type: boolean
+          default: true
+    Contact:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - PERSON
+            - BUSINESS
+        address:
+          $ref: '#/components/schemas/Address'
+        phone:
+          $ref: '#/components/schemas/Phone'
+    PersonContact:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+    BusinessContact:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            orgNr:
+              type: string
+            businessName:
+              type: string
+            legalName:
+              type: string
+    Address:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - STREET
+            - POSTBOX
+        country:
+          type: string
+        zipCode:
+          type: string
+        street:
+          type: string
+        houseNr:
+          type: string
+        city:
+          type: string
+        postbox:
+          type: string
+    Phone:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - MOBILE
+            - LANDLINE
+            - VOIP
+        countryCode:
+          type: string
+        phoneNr:
+          type: string
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: number
+          format: int64
+    UUID:
+      type: object
+      properties:
+        id:
+          type: string
+          format: UUID
+        createdAt:
+          type: string
+        modifiedAt:
+          type: string

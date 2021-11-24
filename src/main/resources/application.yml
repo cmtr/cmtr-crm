@@ -1,0 +1,63 @@
+server:
+  error:
+    include-message: always
+
+
+address:
+  type:
+    - STREET
+    - POSTBOX
+
+
+billing:
+  account:
+    type:
+      - PRIVATE
+      - BUSINESS
+    customer:
+      onCreateGenerateBillingAccount: true
+      typeMapping:
+        - source: PRIVATE
+          target: PRIVATE
+        - source: BUSINESS
+          target: BUSINESS
+    owner:
+      typeMapping:
+        - source: PRIVATE
+          target: PERSON
+        - source: BUSINESS
+          target: BUSINESS
+    parameters:
+      efakturaId:
+        key: efakturaId
+        required: false
+        validation: regex
+        message: Incorrect E-Faktura Id format
+
+
+contact:
+  type:
+    - PERSON
+    - BUSINESS
+
+
+customer:
+  type:
+    - PRIVATE
+    - BUSINESS
+  contact:
+    typeMapping:
+      - source: PRIVATE
+        target: PERSON
+      - source: BUSINESS
+        target: BUSINESS
+  parameters:
+    test:
+      key: number
+      required: false
+      validation: ^[0-9]+$
+      message: Incorrect number format
+
+phone:
+  type:
+
