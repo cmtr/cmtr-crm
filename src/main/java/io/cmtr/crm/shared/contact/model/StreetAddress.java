@@ -22,6 +22,10 @@ public class StreetAddress extends AbstractAddress {
 
     public static final String DISCRIMINATOR_VALUE = "STREET";
 
+    private String street;
+
+    private String houseNr;
+
     public StreetAddress() {
         super(DISCRIMINATOR_VALUE);
     }
@@ -30,19 +34,16 @@ public class StreetAddress extends AbstractAddress {
         return String.join(" ", getStreet(), getHouseNr());
     }
 
-    @Override
-    public AbstractAddress setPostbox(String postbox) {
-        return this;
-    }
 
     @Override
     public AbstractAddress update(AbstractAddress source) {
         if (!(source instanceof StreetAddress))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incompatible Address Type");
         super.update(source);
+        StreetAddress src = (StreetAddress) source;
         return this
-                .setStreet(source.getStreet())
-                .setHouseNr(source.getHouseNr());
+                .setStreet(src.getStreet())
+                .setHouseNr(src.getHouseNr());
     }
 
     @Override

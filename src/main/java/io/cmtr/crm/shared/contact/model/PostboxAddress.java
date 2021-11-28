@@ -18,18 +18,10 @@ public class PostboxAddress extends AbstractAddress {
 
     public static final String DISCRIMINATOR_VALUE = "POSTBOX";
 
+    private String postbox;
+
     public PostboxAddress() {
         super(DISCRIMINATOR_VALUE);
-    }
-
-    @Override
-    public AbstractAddress setHouseNr(String houseNr) {
-        return this;
-    }
-
-    @Override
-    public AbstractAddress setStreet(String street) {
-        return this;
     }
 
     @Override
@@ -42,8 +34,9 @@ public class PostboxAddress extends AbstractAddress {
         if (!(source instanceof PostboxAddress))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Incompatible Address Type");
         super.update(source);
+        PostboxAddress src = (PostboxAddress) source;
         return this
-                .setPostbox(source.getPostbox());
+                .setPostbox(src.getPostbox());
     }
 
     @Override

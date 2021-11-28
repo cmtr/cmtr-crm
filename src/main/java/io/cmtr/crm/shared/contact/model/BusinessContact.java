@@ -19,18 +19,14 @@ public class BusinessContact extends AbstractContact {
 
     public static final String DISCRIMINATOR_VALUE = "BUSINESS";
 
+    // Business
+    private String orgNr = "";
+    private String legalName = "";
+    private String countryCode = "";
+    private String businessName = "";
+
     private BusinessContact() {
         super(DISCRIMINATOR_VALUE);
-    }
-
-    @Override
-    protected AbstractContact setFirstName(String firstName) {
-        return this;
-    }
-
-    @Override
-    protected AbstractContact setLastName(String lastName) {
-        return this;
     }
 
     @Override
@@ -38,11 +34,12 @@ public class BusinessContact extends AbstractContact {
         if (!(source instanceof BusinessContact))
             throw new RuntimeException("Incompatible type");
         super.update(source);
+        BusinessContact src = (BusinessContact) source;
         return this
-                .setOrgNr(source.getOrgNr())
-                .setLegalName(source.getLegalName())
-                .setCountryCode(source.getCountryCode())
-                .setBusinessName(source.getBusinessName());
+                .setOrgNr(src.getOrgNr())
+                .setLegalName(src.getLegalName())
+                .setCountryCode(src.getCountryCode())
+                .setBusinessName(src.getBusinessName());
     }
 
     @Override

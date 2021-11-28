@@ -49,16 +49,7 @@ public abstract class AbstractContact implements GenericEntity<Long, AbstractCon
     )
     private String type;
 
-    // Person
-    private String firstName = "";
-    private String lastName = "";
-    // private Date dateOfBirth;
 
-    // Business
-    private String orgNr = "";
-    private String legalName = "";
-    private String countryCode = "";
-    private String businessName = "";
 
     @OneToOne(
             cascade = CascadeType.ALL,

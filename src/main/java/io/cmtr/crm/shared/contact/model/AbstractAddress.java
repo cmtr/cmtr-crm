@@ -45,11 +45,6 @@ public abstract class AbstractAddress implements GenericEntity<Long, AbstractAdd
 
     private String city;
 
-    private String street;
-
-    private String houseNr;
-
-    private String postbox;
 
 
     AbstractAddress(String addressType) {

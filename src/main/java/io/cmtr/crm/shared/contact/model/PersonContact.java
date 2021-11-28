@@ -18,28 +18,13 @@ public class PersonContact extends AbstractContact implements Cloneable {
 
     public static final String DISCRIMINATOR_VALUE = "PERSON";
 
+    // Person
+    private String firstName = "";
+    private String lastName = "";
+    // private Date dateOfBirth;
+
     private PersonContact() {
         super(DISCRIMINATOR_VALUE);
-    }
-
-    @Override
-    protected AbstractContact setOrgNr(String orgNr) {
-        return this;
-    }
-
-    @Override
-    protected AbstractContact setLegalName(String legalName) {
-        return this;
-    }
-
-    @Override
-    protected AbstractContact setCountryCode(String countryCode) {
-        return this;
-    }
-
-    @Override
-    protected AbstractContact setBusinessName(String businessName) {
-        return this;
     }
 
     @Override
@@ -47,9 +32,10 @@ public class PersonContact extends AbstractContact implements Cloneable {
         if (!(source instanceof PersonContact))
             throw new RuntimeException("Incompatible type");
         super.update(source);
+        PersonContact src = (PersonContact) source;
         return this
-                .setFirstName(source.getFirstName())
-                .setLastName(source.getLastName());
+                .setFirstName(src.getFirstName())
+                .setLastName(src.getLastName());
     }
 
     @Override
