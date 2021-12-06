@@ -88,10 +88,18 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
     private BillingAccount billingAccount;
 
 
+
     /**
-     * Allowance Charge a given invoice is used on
+     *
+     * Allowance Charge Invoice reference
+     *
+     * Set once the allowance charge is allocated to one specific invoice
+     *
      */
+    @Setter(AccessLevel.PRIVATE)
     private Invoice invoice;
+
+
 
     /**
      *
@@ -105,8 +113,6 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
     /**
      * Constructor
      *
-     *
-     *
      * @param type - String - Discriminator value
      */
     protected AllowanceCharge(String type) {
@@ -118,23 +124,53 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
     ///**** SETTERS ****///
 
 
-    public AllowanceCharge complete(Invoice invoice) {
+
+    /**
+     *
+     * @param invoice
+     * @return
+     */
+    protected AllowanceCharge complete(Invoice invoice) {
         validateCompletion(invoice);
+        this.setInvoice(invoice);
         this.state = State.COMPLETE;
         return this;
     }
 
+
+    /**
+     *
+     * @return
+     */
+    public AllowanceCharge delete() {
+        validateDeletion();
+        this.state = State.DELETED;
+        return this;
+    }
+
+
+
+    /**
+     *
+     * @param source
+     * @return
+     */
     @Override
     public AllowanceCharge update(AllowanceCharge source) {
         return this;
     }
 
+
+
+    /**
+     *
+     * @return
+     */
     @Override
     public AllowanceCharge createNewInstance() {
-        return this
-                .setState(State.NEW);
-
+        return this.setState(State.NEW);
     }
+
 
 
     ///**** STATIC RESOURCES ****///
@@ -143,9 +179,9 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
     public enum State {
         NEW,
-        IN_PROGRESS,
+        PREPARING,
         COMPLETE,
-        CANCELLED
+        DELETED
     }
 
 
@@ -154,9 +190,34 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
 
 
+    /**
+     *
+     * @param message
+     */
+    private void preparingOrThrow(String message) {
+        if (this.state != State.PREPARING)
+            throw new IllegalStateException(message);
+    }
+
+
+
+    /**
+     *
+     */
+    private void validateDeletion() {
+        if (this.state == State.COMPLETE)
+            throw new IllegalStateException("COMPLETED charge cannot be deleted");
+    }
+
+
+
+    /**
+     *
+     * @param invoice
+     */
     private void validateCompletion(Invoice invoice) {
-        if (this.state != State.IN_PROGRESS)
-            throw new IllegalStateException("Charge must be IN PROGESS to complete");
+        if (this.state != State.PREPARING)
+            throw new IllegalStateException("Charge must be PREPARING to complete");
         // TODO - Validate Billing Account and Supplier
     }
 }

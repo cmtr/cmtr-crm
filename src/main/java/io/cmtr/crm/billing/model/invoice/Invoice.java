@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter(AccessLevel.PROTECTED)
-@EqualsAndHashCode
 @Accessors(chain = true)
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -131,13 +130,20 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
     /**
      *
+     *
+     * Mapped by the Invoice to Allowance / Charge Mapping Table in preparation 
+     * 
      */
-    private List<IInvoiceLineItem> lineItems;
+    @ManyToOne(
+            fetch = FetchType.EAGER
+    )
+    private List<InvoiceLineItem> lineItems;
 
 
 
     /**
      *
+     * Mapped by the Invoice to Allowance / Charge Mapping Table in preparation
      */
     @JsonIgnore
     private List<DocumentLevelAllowanceCharge> allowanceCharges;
@@ -248,6 +254,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
         return null;
     }
 
+    public List<IInvoiceLineItem> getLineItems() {
+        return getLineItems();
+    }
+
 
 
     ///**** SETTERS ****///
@@ -261,8 +271,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public Invoice addInvoiceLineItem(@NotNull InvoiceLineItem lineItem) {
         setStateToInProgressIfNew();
-        inProgressOrThrow("Invoice lines can only be added in state NEW or IN PROGRESS");
-        lineItem.setInvoice(this);
+        inPrepareOrThrow("Invoice lines can only be added in state NEW or IN PROGRESS");
         lineItems.add(lineItem);
         return this;
     }
@@ -275,9 +284,8 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     public Invoice removeInvoiceLineItem(InvoiceLineItem lineItem) {
-        inProgressOrThrow("Invoice lines can only be removed in state IN PROGRESS");
-        if (lineItems.remove(lineItem))
-            lineItem.setInvoice(null);
+        inPrepareOrThrow("Invoice lines can only be removed in state IN PROGRESS");
+        lineItems.remove(lineItem);
         return this;
     }
 
@@ -290,7 +298,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public Invoice addDocumentLevelAllowanceCharge(DocumentLevelAllowanceCharge allowanceCharge) {
         setStateToInProgressIfNew();
-        inProgressOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
+        inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
         // TODO
         return this;
     }
@@ -303,7 +311,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     public Invoice removeDocumentLevelAllowanceCharge(DocumentLevelAllowanceCharge allowanceCharge) {
-        inProgressOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
+        inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
         // TODO
         return this;
     }
@@ -315,16 +323,26 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     public Invoice complete() {
-        inProgressOrThrow("A invoice can only be set to COMPLETE when in state IN PROGRESS");
+        inPrepareOrThrow("A invoice can only be set to COMPLETE when in state IN PROGRESS");
         this.state = State.COMPLETE;
-        this.issuer = this.supplier.getCustomer().createNewInstance();
-        this.owner = this.billingAccount.getOwner().createNewInstance();
-        this.recipient = this.billingAccount.getRecipient().createNewInstance();
+        createContacts();
         this.issueDate = ZonedDateTime.now();
-        // TODO - Set Invoice Id for Invoice Lines and Allowance Charges.
+        this.allowanceCharges.forEach(ac -> ac.complete(this));
+        this.lineItems.forEach(ac -> ac.complete(this));
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
+    public Invoice simulate() {
+        inPrepareOrThrow("A invoice can only be set to SIMULATE when in state IN PROGRESS");
+        this.state = State.SIMULATED;
+        createContacts();
+        // Do not set the invoice property of line items or allowances
+        return this;
+    }
 
 
     /**
@@ -379,9 +397,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public enum State {
         NEW,
-        IN_PROGRESS,
+        PREPARE,
         COMPLETE,
-        CANCELLED
+        CANCELLED,
+        SIMULATED
     }
 
 
@@ -390,14 +409,34 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
 
+    /**
+     *
+     */
     private void setStateToInProgressIfNew() {
         if (this.state == State.NEW)
-            this.state = State.IN_PROGRESS;
+            this.state = State.PREPARE;
     }
 
-    private void inProgressOrThrow(String message) {
-        if (this.state != State.IN_PROGRESS)
+
+
+    /**
+     *
+     * @param message
+     */
+    private void inPrepareOrThrow(String message) {
+        if (this.state != State.PREPARE)
             throw new IllegalStateException(message);
+    }
+
+
+
+    /**
+     *
+     */
+    private void createContacts() {
+        this.issuer = this.supplier.getCustomer().createNewInstance();
+        this.owner = this.billingAccount.getOwner().createNewInstance();
+        this.recipient = this.billingAccount.getRecipient().createNewInstance();
     }
 
 }

@@ -21,50 +21,15 @@ import java.util.stream.Collectors;
  */
 @Getter
 @Setter(AccessLevel.PROTECTED)
-@EqualsAndHashCode
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Accessors(chain = true)
 @Entity
-public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, IInvoiceLineItem {
-
-
-
-    /**
-     *
-     *
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
-    private Long id;
-
-
+@DiscriminatorValue(InvoiceLineItem.DISCRIMINATOR_VALUE)
+public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem {
 
     /**
      *
      */
-    private State state;
-
-
-
-    /**
-     *
-     */
-    private boolean charge;
-
-
-
-    /**
-     *
-     */
-    @ManyToOne(
-            optional = false,
-            targetEntity = Invoice.class,
-            fetch = FetchType.LAZY
-    )
-    @JsonIgnore
-    private Invoice invoice;
-
-
+    public static final String DISCRIMINATOR_VALUE = "LINE_ITEM";
 
     /**
      *
@@ -75,6 +40,9 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
     private LineItemPrice price;
 
 
+    public InvoiceLineItem() {
+        super(DISCRIMINATOR_VALUE);
+    }
 
     /**
      *
@@ -131,28 +99,6 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
      *
      * @return
      */
-    @JsonInclude
-    public Long getInvoiceId() {
-        return invoice.getId();
-    }
-
-
-
-    /**
-     *
-     * @return
-     */
-    public String getCurrency() {
-        // TODO - Write implementation
-        return "";
-    }
-
-
-
-    /**
-     *
-     * @return
-     */
     @Override
     public BigDecimal getQuantity() {
         return null;
@@ -173,23 +119,15 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
     ///**** SETTERS ****///
 
 
-
     /**
      *
+     * @param invoice
      * @return
      */
-    public InvoiceLineItem complete() {
-        return this;
-    }
-
-
-
-    /**
-     *
-     * @return
-     */
-    public InvoiceLineItem cancell() {
-        // TODO
+    @Override
+    protected InvoiceLineItem complete(Invoice invoice) {
+        super.complete(invoice);
+        this.allowanceCharges.forEach(ac -> ac.complete(invoice));
         return this;
     }
 
@@ -201,7 +139,7 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
      * @return
      */
     @Override
-    public InvoiceLineItem update(InvoiceLineItem source) {
+    public InvoiceLineItem update(AllowanceCharge source) {
         return null;
     }
 
@@ -214,7 +152,6 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
     @Override
     public InvoiceLineItem createNewInstance() {
         return new InvoiceLineItem()
-                .setState(State.NEW)
                 .update(this);
     }
 
@@ -230,33 +167,8 @@ public class InvoiceLineItem implements GenericEntity<Long, InvoiceLineItem>, II
 
 
 
-    ///**** STATIC RESOURCES ****///
-
-
-
-    public enum State {
-        NEW,
-        IN_PROGESS,
-        COMPLETE,
-        CANCELLED
-    }
-
-
-
     ///**** HELPER METHODS ****∕∕∕
 
 
-
-    private void setStateToInProgressIfNew() {
-        if (this.state == State.NEW)
-            this.state = State.IN_PROGESS;
-    }
-
-
-
-    private void inProgressOrThrow(String message) {
-        if (this.state != State.IN_PROGESS)
-            throw new IllegalStateException(message);
-    }
 
 }

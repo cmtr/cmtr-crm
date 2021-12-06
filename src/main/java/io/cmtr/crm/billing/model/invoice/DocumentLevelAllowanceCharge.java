@@ -82,8 +82,10 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
      * @return
      */
     @Override
-    public DocumentLevelAllowanceCharge update(IAllowanceCharge source) {
+    public DocumentLevelAllowanceCharge update(AllowanceCharge source) {
         super.update(source);
+        // if (source instanceof DocumentLevelAllowanceCharge src)
+        // Unable to get language support for Java 17  (14) in Intellij
         if (source instanceof DocumentLevelAllowanceCharge)
             this.setVatCategory(((DocumentLevelAllowanceCharge) source).getVatCategory());
         return this;
@@ -99,7 +101,8 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     public DocumentLevelAllowanceCharge createNewInstance() {
         DocumentLevelAllowanceCharge ac = new DocumentLevelAllowanceCharge();
         ac.setState(State.NEW);
-        return ac.update(this);
+        ac.update(this);
+        return ac;
     }
 
 
