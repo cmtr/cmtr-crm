@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author Harald Blikø
  */
-public interface IInvoiceLineItem extends IAllowanceCharge, IAmount, IQuantity {
+public interface IInvoiceLineItem extends IAllowanceCharge, IQuantity {
 
     BigDecimal getGrossPrice();
 

@@ -8,12 +8,29 @@ import java.math.BigDecimal;
  *
  * @author Harald Blikø
  */
-public interface IVatCategoryAmount extends IAmount, IVatCategory {
+public interface IVatCategoryAmount extends IVatCategory {
 
-    BigDecimal getNetAmuont();
+    BigDecimal getNetAmount();
 
+    /**
+     *
+     * @return unrounded vat value
+     */
+    default BigDecimal getVat() {
+        return getNetAmount()
+                .multiply(getRate())
+                .divide(new BigDecimal("100"));
+    }
+
+    /**
+     *
+     * Set to precision 2 and half up rounding mode
+     *
+     * @return vat amount
+     */
     default BigDecimal getVatAmount() {
-        return getAmount();
+        return getVat()
+                .setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
     }
 
 }

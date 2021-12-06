@@ -56,7 +56,7 @@ public interface IInvoice extends IAmount {
     default BigDecimal getTotalVatAmount() {
         return getVatCategoryAmounts()
                 .stream()
-                .map(IVatCategoryAmount::getAmount)
+                .map(IVatCategoryAmount::getVatAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
