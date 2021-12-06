@@ -2,6 +2,7 @@ package io.cmtr.crm.customer.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import io.cmtr.crm.billing.model.billcycle.BillCycle;
 import io.cmtr.crm.customer.dto.BillingAccountDeserializer;
 import io.cmtr.crm.customer.dto.ICustomerToBillingAccountMapper;
 import io.cmtr.crm.customer.event.IllegalBillingAccountStateException;
@@ -40,6 +41,8 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
     // Should be fixed at entity instantiation time
     @NotNull(message = "Account type cannot be null")
     private String type;
+
+    private BillCycle billCycle;
 
     @Setter(AccessLevel.PUBLIC)
     private boolean barred;

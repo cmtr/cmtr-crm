@@ -59,7 +59,7 @@ public class BillingAccountDeserializer extends GenericDeserializer<BillingAccou
 
     private Customer getCustomer(JsonNode node) {
         UUID id = UUID.fromString(node.get("customerId").textValue());
-        return Customer.parse(id);
+        return Customer.factory(id);
     }
 
 }

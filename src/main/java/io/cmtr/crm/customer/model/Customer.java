@@ -69,8 +69,9 @@ public class Customer implements GenericEntity<UUID, Customer> {
     private AbstractContact customer;
 
 
-    @Email(message = "Incorrect email format")
+    // @Email(message = "Incorrect email format")
     @NotNull(message = "Customer e-mail cannot be null")
+    // @Column(unique = true)
     private String email;
 
     // https://www.baeldung.com/hibernate-persisting-maps
@@ -89,7 +90,7 @@ public class Customer implements GenericEntity<UUID, Customer> {
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
 
-    public Customer(@NotNull(message = "Customer type cannot be null") String type) {
+    protected Customer(@NotNull(message = "Customer type cannot be null") String type) {
         this.type = type;
     }
 
@@ -157,7 +158,7 @@ public class Customer implements GenericEntity<UUID, Customer> {
                 .update(this);
     }
 
-    public static Customer parse(
+    public static Customer factory(
             String type,
             Map<String, String> parameters,
             AbstractContact customer,
@@ -170,7 +171,7 @@ public class Customer implements GenericEntity<UUID, Customer> {
             .setEmail(email);
     }
 
-    public static Customer parse(UUID id) {
+    public static Customer factory(UUID id) {
         return new Customer().setId(id);
     }
 
