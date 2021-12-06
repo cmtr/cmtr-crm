@@ -3,7 +3,6 @@ package io.cmtr.crm.price.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
-import io.cmtr.crm.shared.price.model.UnitPrice;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

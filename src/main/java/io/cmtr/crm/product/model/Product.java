@@ -1,7 +1,6 @@
 package io.cmtr.crm.product.model;
 
 import io.cmtr.crm.shared.generic.model.GenericEntity;
-import io.cmtr.crm.shared.price.model.Price;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,8 +10,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,7 +32,7 @@ public class Product implements GenericEntity<UUID, Product> {
 
     private List<ProductFeature> features;
 
-    private List<Price> prices;
+    // private List<Price> prices;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
