@@ -74,7 +74,6 @@ public class Customer implements GenericEntity<UUID, Customer> {
     // @Column(unique = true)
     private String email;
 
-    // https://www.baeldung.com/hibernate-persisting-maps
     @ElementCollection
     @CollectionTable(
             name = "customer_parameters",

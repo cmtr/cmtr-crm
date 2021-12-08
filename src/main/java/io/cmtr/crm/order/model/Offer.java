@@ -18,7 +18,6 @@ import java.util.List;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
-@Entity
 public class Offer implements GenericEntity<Long, Offer> {
 
     @Id

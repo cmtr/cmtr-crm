@@ -8,6 +8,10 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 @Setter
 @Getter
@@ -16,8 +20,11 @@ import javax.persistence.Entity;
 @Entity
 public class PriceFeed implements GenericEntity<Long, PriceFeed> {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    @NotNull
     private State state;
 
     @Override

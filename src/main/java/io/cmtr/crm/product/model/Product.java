@@ -19,7 +19,6 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode
 @Accessors(chain = true)
-@Entity
 @NoArgsConstructor
 public class Product implements GenericEntity<UUID, Product> {
 

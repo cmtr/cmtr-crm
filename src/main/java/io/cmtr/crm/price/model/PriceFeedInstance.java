@@ -26,7 +26,8 @@ public class PriceFeedInstance implements GenericEntity<Long, PriceFeedInstance>
 
     @NotNull
     @ManyToOne(
-            optional = false
+            optional = false,
+            fetch = FetchType.LAZY
     )
     @JsonIgnore
     private PriceFeed priceFeed;
