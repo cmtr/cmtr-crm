@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 import java.math.BigDecimal;
 
 
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
+@Entity
 @DiscriminatorValue(DocumentLevelAllowanceCharge.DISCRIMINATOR_VALUE)
 public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDocumentLevelAllowanceCharge {
 

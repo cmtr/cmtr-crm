@@ -13,7 +13,6 @@ import java.util.List;
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Entity
 public class CreditNote extends Invoice {
 
     private List<Invoice> invoices;

@@ -23,16 +23,16 @@ import java.util.stream.Collectors;
 /**
  * Invoice
  *
- *
  * https://docs.peppol.eu/poacc/billing/3.0/
  *
  * @author Harald Blikø
- * @
+ *
  */
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
 @Entity
+@Table(name = "invoices")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
@@ -52,6 +52,14 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     @NotNull
     private State state;
+
+
+
+    /**
+     * Invoice currency
+     */
+    private String currency;
+
 
 
 
@@ -130,23 +138,20 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
     /**
      *
-     *
-     * Mapped by the Invoice to Allowance / Charge Mapping Table in preparation 
-     * 
-     */
-    @ManyToOne(
-            fetch = FetchType.EAGER
-    )
-    private List<InvoiceLineItem> lineItems;
-
-
-
-    /**
-     *
      * Mapped by the Invoice to Allowance / Charge Mapping Table in preparation
      */
     @JsonIgnore
-    private List<DocumentLevelAllowanceCharge> allowanceCharges;
+    @Getter(AccessLevel.PROTECTED)
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL
+    )
+    @JoinTable(
+            name = "invoice_document_allowance_charges",
+            joinColumns = { @JoinColumn(name = "invoice_id") },
+            inverseJoinColumns = { @JoinColumn(name = "allowance_charge_id")}
+    )
+    private Set<AllowanceCharge> allowanceCharges;
 
 
 
@@ -164,10 +169,12 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return list of document level allowances
      */
     @JsonInclude
+    @Transient
     public List<IDocumentLevelAllowanceCharge> getAllowances() {
         return allowanceCharges
                 .stream()
-                .filter(e -> !e.isCharge())
+                .filter(e -> !e.isCharge() && e instanceof IDocumentLevelAllowanceCharge)
+                .map(e -> (IDocumentLevelAllowanceCharge) e)
                 .collect(Collectors.toList());
     }
 
@@ -179,20 +186,36 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return list of document level charges
      */
     @JsonInclude
+    @Transient
     public List<IDocumentLevelAllowanceCharge> getCharges() {
         return allowanceCharges
                 .stream()
-                .filter(DocumentLevelAllowanceCharge::isCharge)
+                .filter(e -> e.isCharge() && e instanceof IDocumentLevelAllowanceCharge)
+                .map(e -> (IDocumentLevelAllowanceCharge) e)
                 .collect(Collectors.toList());
     }
 
 
+    /**
+     * List filtered executed on method call
+     *
+     * @return list of invoice line items
+     */
+    @Transient
+    public List<IInvoiceLineItem> getLineItems() {
+        return allowanceCharges
+                .stream()
+                .filter(e -> e instanceof IInvoiceLineItem)
+                .map(e -> (InvoiceLineItem) e)
+                .collect(Collectors.toList());
+    }
 
     /**
      *
      * @return
      */
     @JsonInclude
+    @Transient
     public UUID getBillingAccountId() {
         return billingAccount.getId();
     }
@@ -205,16 +228,19 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return set of all unique vat categories used
      */
     @JsonInclude
+    @Transient
     public Set<IVatCategory> getVatCategories() {
-        Set<IVatCategory> vatCategories = allowanceCharges
+        return  allowanceCharges
                 .stream()
-                .map(DocumentLevelAllowanceCharge::getVatCategory)
+                .map(e -> {
+                    if (e instanceof IDocumentLevelAllowanceCharge)
+                        return ((IDocumentLevelAllowanceCharge) e).getVatCategory();
+                    else if (e instanceof InvoiceLineItem)
+                        return ((InvoiceLineItem) e).getVatCategory();
+                    else
+                        throw new UnsupportedOperationException("Illegal allowance charge type stored as invoice allowance charge");
+                })
                 .collect(Collectors.toSet());
-        vatCategories.addAll(lineItems
-                .stream()
-                .map(IInvoiceLineItem::getVatCategory)
-                .collect(Collectors.toSet()));
-        return vatCategories;
 
     }
 
@@ -225,6 +251,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     @Override
+    @Transient
     public List<IVatCategoryAmount> getVatCategoryAmounts() {
         // TODO - when VatCategoryAmount is defined
         return null;
@@ -238,24 +265,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     @Override
     public BigDecimal getAmount() {
-        // Todo
-        return null;
-    }
-
-
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public String getCurrency() {
-        // TODO
-        return null;
-    }
-
-    public List<IInvoiceLineItem> getLineItems() {
-        return getLineItems();
+        return allowanceCharges
+                .stream()
+                .map(AllowanceCharge::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 
@@ -270,9 +283,9 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     public Invoice addInvoiceLineItem(@NotNull InvoiceLineItem lineItem) {
-        setStateToInProgressIfNew();
+        setStateToPrepareIfNew();
         inPrepareOrThrow("Invoice lines can only be added in state NEW or IN PROGRESS");
-        lineItems.add(lineItem);
+        allowanceCharges.add(lineItem);
         return this;
     }
 
@@ -285,7 +298,8 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public Invoice removeInvoiceLineItem(InvoiceLineItem lineItem) {
         inPrepareOrThrow("Invoice lines can only be removed in state IN PROGRESS");
-        lineItems.remove(lineItem);
+        validateAllowanceCharge(lineItem);
+        allowanceCharges.remove(lineItem);
         return this;
     }
 
@@ -296,10 +310,11 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @param allowanceCharge
      * @return
      */
-    public Invoice addDocumentLevelAllowanceCharge(DocumentLevelAllowanceCharge allowanceCharge) {
-        setStateToInProgressIfNew();
+    public Invoice addDocumentLevelAllowanceCharge(@NotNull DocumentLevelAllowanceCharge allowanceCharge) {
+        setStateToPrepareIfNew();
         inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
-        // TODO
+        validateAllowanceCharge(allowanceCharge);
+        allowanceCharges.add(allowanceCharge);
         return this;
     }
 
@@ -312,7 +327,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public Invoice removeDocumentLevelAllowanceCharge(DocumentLevelAllowanceCharge allowanceCharge) {
         inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
-        // TODO
+        allowanceCharges.remove(allowanceCharge);
         return this;
     }
 
@@ -325,10 +340,8 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     public Invoice complete() {
         inPrepareOrThrow("A invoice can only be set to COMPLETE when in state IN PROGRESS");
         this.state = State.COMPLETE;
-        createContacts();
-        this.issueDate = ZonedDateTime.now();
+        finalizeEntity();
         this.allowanceCharges.forEach(ac -> ac.complete(this));
-        this.lineItems.forEach(ac -> ac.complete(this));
         return this;
     }
 
@@ -339,7 +352,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     public Invoice simulate() {
         inPrepareOrThrow("A invoice can only be set to SIMULATE when in state IN PROGRESS");
         this.state = State.SIMULATED;
-        createContacts();
+        finalizeEntity();
         // Do not set the invoice property of line items or allowances
         return this;
     }
@@ -388,6 +401,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
 
+
     ///**** STATIC RESOURCES ****∕∕∕
 
 
@@ -410,9 +424,9 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
     /**
-     *
+     *  Set states to PREPARING if NEW
      */
-    private void setStateToInProgressIfNew() {
+    private void setStateToPrepareIfNew() {
         if (this.state == State.NEW)
             this.state = State.PREPARE;
     }
@@ -420,8 +434,9 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
     /**
+     * Validate state or throw exception
      *
-     * @param message
+     * @param message - thrown with IllegalSateException
      */
     private void inPrepareOrThrow(String message) {
         if (this.state != State.PREPARE)
@@ -431,12 +446,52 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
     /**
+     * Validates that the state and allocation of the allowance charge meet requirements
+     * for being added to a invoice
+     *
+     * Validates the allowance currency equals the invoice currency.
+     *
+     * @param allowanceCharge - allowance charge to be added to invoice
+     */
+    protected void validateAllowanceCharge(AllowanceCharge allowanceCharge) {
+        val state = allowanceCharge.getState();
+        if (
+                    allowanceCharge.getInvoice() != null
+                ||  state == AllowanceCharge.State.COMPLETE
+                ||  state == AllowanceCharge.State.DELETED
+        )
+            throw new UnsupportedOperationException("A completed or deleted allowance charge cannot be added to a invoice");
+
+        setCurrencyIfNull(allowanceCharge.getCurrency());
+        if (!this.currency.equals(allowanceCharge.getCurrency()))
+            throw new UnsupportedOperationException("The allowance charge currency must match invoice currency");
+    }
+
+
+
+    /**
+     *
+     * @param currency
+     */
+    private void setCurrencyIfNull(String currency) {
+        if (this.currency == null)
+            this.currency = currency;
+    }
+
+
+    /**
+     *
+     * Copy and persists the issuer, owner and recipient contact information at time of finalization.
+     * Sets the issue date of finalization.
      *
      */
-    private void createContacts() {
+    private void finalizeEntity() {
         this.issuer = this.supplier.getCustomer().createNewInstance();
         this.owner = this.billingAccount.getOwner().createNewInstance();
         this.recipient = this.billingAccount.getRecipient().createNewInstance();
+        this.issueDate = ZonedDateTime.now();
     }
+
+
 
 }

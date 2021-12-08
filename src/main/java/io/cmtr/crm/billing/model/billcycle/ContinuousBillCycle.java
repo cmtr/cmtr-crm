@@ -20,7 +20,6 @@ import javax.validation.constraints.PositiveOrZero;
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
-@Entity
 @DiscriminatorValue(ContinuousBillCycle.DISCRIMINATOR_VALUE)
 public class ContinuousBillCycle extends BillCycle {
 

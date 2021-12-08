@@ -17,6 +17,7 @@ import java.util.UUID;
 @Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
 @Entity
+@Table(name = "bill_cycles")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "bill_cycle_type")
 public abstract class BillCycle implements GenericEntity<UUID, BillCycle> {
@@ -36,7 +37,13 @@ public abstract class BillCycle implements GenericEntity<UUID, BillCycle> {
 
     private boolean locked;
 
+    @OneToMany(
+            mappedBy = "billCycle"
+    )
     private List<BillRun> billRuns;
+
+    // supplier
+    // billing accounts
 
     @ElementCollection
     @CollectionTable(

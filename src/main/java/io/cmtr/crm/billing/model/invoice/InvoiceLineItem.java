@@ -10,8 +10,10 @@ import lombok.experimental.Accessors;
 import lombok.experimental.Delegate;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -40,7 +42,7 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
     private LineItemPrice price;
 
 
-    public InvoiceLineItem() {
+    protected InvoiceLineItem() {
         super(DISCRIMINATOR_VALUE);
     }
 
@@ -61,7 +63,16 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
      */
     @JsonIgnore
     @Getter(AccessLevel.PROTECTED)
-    private List<LineItemAllowanceCharge> allowanceCharges;
+    @ManyToMany(
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL
+    )
+    @JoinTable(
+            name = "line_item_allowance_charges",
+            joinColumns = { @JoinColumn(name = "invoice_line_item_id") },
+            inverseJoinColumns = { @JoinColumn(name = "allowance_charge_id")}
+    )
+    private Set<LineItemAllowanceCharge> allowanceCharges;
 
 
 
@@ -73,6 +84,7 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
      *
      * @return
      */
+    @Transient
     public List<IInvoiceLineItemAllowanceCharge> getAllowances() {
         return allowanceCharges
                 .stream()
@@ -86,6 +98,7 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
      *
      * @return
      */
+    @Transient
     public List<IInvoiceLineItemAllowanceCharge> getCharges() {
         return allowanceCharges
                 .stream()
@@ -118,6 +131,18 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
 
     ///**** SETTERS ****///
 
+
+    public InvoiceLineItem addAllowanceCharge(@NotNull LineItemAllowanceCharge allowanceCharge) {
+        // TODO validate
+        allowanceCharges.add(allowanceCharge);
+        return this;
+    }
+
+    public InvoiceLineItem removeAllowanceCharge(LineItemAllowanceCharge allowanceCharge) {
+        // TODO validate
+        allowanceCharges.remove(allowanceCharge);
+        return this;
+    }
 
     /**
      *

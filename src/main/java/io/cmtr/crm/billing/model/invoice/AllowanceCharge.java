@@ -74,6 +74,7 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      * Party claiming the allowance or charge
      */
     @NotNull
+    @ManyToOne
     private Supplier supplier;
 
 
@@ -85,6 +86,7 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      *
      */
     @NotNull
+    @ManyToOne
     private BillingAccount billingAccount;
 
 
@@ -97,6 +99,8 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      *
      */
     @Setter(AccessLevel.PRIVATE)
+    @ManyToOne
+    @JoinColumn(referencedColumnName = "id")
     private Invoice invoice;
 
 
@@ -131,6 +135,7 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      * @return
      */
     protected AllowanceCharge complete(Invoice invoice) {
+        preparingOrThrow("Cannot complete allowance charge when not");
         validateCompletion(invoice);
         this.setInvoice(invoice);
         this.state = State.COMPLETE;
@@ -194,7 +199,7 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      *
      * @param message
      */
-    private void preparingOrThrow(String message) {
+    protected void preparingOrThrow(String message) {
         if (this.state != State.PREPARING)
             throw new IllegalStateException(message);
     }
@@ -204,7 +209,7 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
     /**
      *
      */
-    private void validateDeletion() {
+    protected void validateDeletion() {
         if (this.state == State.COMPLETE)
             throw new IllegalStateException("COMPLETED charge cannot be deleted");
     }
