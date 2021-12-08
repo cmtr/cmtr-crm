@@ -1,6 +1,5 @@
 package io.cmtr.crm.mediation.model;
 
-import io.cmtr.crm.order.model.Offer;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
 import io.cmtr.crm.shared.mediation.model.IUsage;
 import lombok.AccessLevel;

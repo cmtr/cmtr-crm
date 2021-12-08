@@ -1,10 +1,8 @@
 package io.cmtr.crm.billing.model.invoice;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import io.cmtr.crm.shared.billing.model.IInvoiceLineItem;
 import io.cmtr.crm.shared.billing.model.IInvoiceLineItemAllowanceCharge;
-import io.cmtr.crm.shared.generic.model.GenericEntity;
 import lombok.*;
 import lombok.experimental.Accessors;
 import lombok.experimental.Delegate;

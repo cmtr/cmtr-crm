@@ -6,7 +6,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 

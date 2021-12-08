@@ -8,7 +8,6 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Getter

@@ -1,6 +1,5 @@
 package io.cmtr.crm.billing.model.invoice;
 
-import io.cmtr.crm.shared.billing.model.IAllowanceCharge;
 import io.cmtr.crm.shared.billing.model.IDocumentLevelAllowanceCharge;
 import lombok.AccessLevel;
 import lombok.Getter;
