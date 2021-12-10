@@ -28,7 +28,7 @@ public interface IInvoice extends IAmount {
     default BigDecimal getTotalAllowanceNetAmount() {
         return getAllowances()
                 .stream()
-                .map(IAmount::getAmount)
+                .map(IAllowanceCharge::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

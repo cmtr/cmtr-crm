@@ -150,7 +150,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
             joinColumns = { @JoinColumn(name = "invoice_id") },
             inverseJoinColumns = { @JoinColumn(name = "allowance_charge_id")}
     )
-    private Set<AllowanceCharge> allowanceCharges = Collections.EMPTY_SET;
+    private Set<AllowanceCharge> allowanceCharges = new HashSet<>();
 
 
 
@@ -271,10 +271,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     @Override
     public BigDecimal getAmount() {
-        return allowanceCharges
-                .stream()
-                .map(AllowanceCharge::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return getTotalNetAmount();
     }
 
 
@@ -320,7 +317,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
         setStateToPrepareIfNew();
         inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
         validateAllowanceCharge(allowanceCharge);
-        allowanceCharges.add(allowanceCharge);
+        allowanceCharges.add((AllowanceCharge) allowanceCharge);
         return this;
     }
 
@@ -434,7 +431,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     private void setStateToPrepareIfNew() {
         if (this.state == State.NEW)
-            this.state = State.PREPARE;
+            this.setState(State.PREPARE);
     }
 
 

@@ -4,6 +4,7 @@ import io.cmtr.crm.billing.BillingTestUtil;
 import io.cmtr.crm.customer.CustomerTestUtil;
 import io.cmtr.crm.customer.model.BillingAccount;
 import io.cmtr.crm.customer.model.Supplier;
+import io.cmtr.crm.shared.billing.model.IAmount;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
@@ -63,16 +64,15 @@ class InvoiceTest {
                 assertTrue(supplier == documentLevelCharge.getSupplier());
                 assertEquals(supplier, documentLevelCharge.getSupplier());
                 assertEquals(AllowanceCharge.State.PREPARING, documentLevelAllowance.getState());
-                assertEquals(charge, documentLevelCharge.getNetAmount());
-                assertEquals(allowance, documentLevelAllowance.getNetAmount());
+                assertEquals(charge, documentLevelCharge.getNet());
+                assertEquals(allowance, documentLevelAllowance.getNet());
+                assertEquals(supplier, invoice.getSupplier());
+                assertEquals(billingAccount, invoice.getBillingAccount());
             }
 
             @Test
             @DisplayName("when a invoice is created then")
             void noCharge() {
-                Invoice invoice = Invoice
-                        .factory(supplier, billingAccount)
-                        .createNewInstance();
                 assertEquals(supplier, invoice.getSupplier());
                 assertEquals(billingAccount, invoice.getBillingAccount());
                 assertEquals(BigDecimal.ZERO, invoice.getAmount(), "Amount - Net Amount");
@@ -89,20 +89,31 @@ class InvoiceTest {
             @Test
             @DisplayName("when a charge is added to a invoice then")
             void withCharge() {
-
+                invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+                BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
+                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
             }
 
             @Test
             @DisplayName("when a allowance is added to a invoice then")
             void withAllowance() {
-
+                invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
+                BigDecimal net = allowance.negate().setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
+                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
             }
 
 
             @Test
             @DisplayName("when a charge and allowance is added to a invoice then")
             void withChargeAndAllowance() {
-
+                invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
+                invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+                BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE)
+                        .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
             }
 
             @Nested

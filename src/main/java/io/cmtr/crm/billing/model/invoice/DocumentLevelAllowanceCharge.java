@@ -2,6 +2,7 @@ package io.cmtr.crm.billing.model.invoice;
 
 import io.cmtr.crm.customer.model.BillingAccount;
 import io.cmtr.crm.customer.model.Supplier;
+import io.cmtr.crm.shared.billing.model.IAmount;
 import io.cmtr.crm.shared.billing.model.IDocumentLevelAllowanceCharge;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 import java.math.BigDecimal;
 
 
@@ -40,7 +42,7 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     private VatCategory vatCategory;
 
 
-    private BigDecimal netAmount;
+    private BigDecimal net;
 
     /**
      *
@@ -55,12 +57,21 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
      *
      * @return
      */
-    @Override
-    public BigDecimal getAmount() {
-        return getNetAmount();
+    public BigDecimal getNetAmount() {
+        return net.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
     }
 
 
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    @Transient
+    public BigDecimal getAmount() {
+        return getNetAmount();
+    }
 
     ///**** SETTERS ****///
 
@@ -93,7 +104,7 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
             DocumentLevelAllowanceCharge documentLevelAllowanceCharge = (DocumentLevelAllowanceCharge) source;
             this.setVatCategory(documentLevelAllowanceCharge.getVatCategory());
             this.setCurrency(getVatCategory().getCurrency());
-            this.setNetAmount(documentLevelAllowanceCharge.getNetAmount());
+            this.setNet(documentLevelAllowanceCharge.getNet());
         }
         return this;
     }
@@ -120,11 +131,11 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
             Supplier supplier,
             BillingAccount billingAccount,
             VatCategory vatCategory,
-            BigDecimal netAmount
+            BigDecimal net
     ) {
         DocumentLevelAllowanceCharge documentLevelAllowanceCharge = new DocumentLevelAllowanceCharge()
                 .setVatCategory(vatCategory)
-                .setNetAmount(netAmount);
+                .setNet(net);
         documentLevelAllowanceCharge
                 .setCharge(isCharge)
                 .setSupplier(supplier)
