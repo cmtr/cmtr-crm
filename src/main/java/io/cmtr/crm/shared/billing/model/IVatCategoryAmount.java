@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  *
  * @author Harald Blikø
  */
-public interface IVatCategoryAmount extends IVatCategory {
+public interface IVatCategoryAmount extends IVatCategory, IAmount {
 
     BigDecimal getNetAmount();
 

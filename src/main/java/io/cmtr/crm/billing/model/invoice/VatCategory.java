@@ -34,20 +34,39 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
     @NotEmpty
     private String category;
 
+    @NotEmpty
+    private String currency;
+
     // private ZonedDateTime validFrom;
     // private ZonedDateTime validTo;
+
+    ///*** SETTERS ***///
 
     @Override
     public VatCategory update(VatCategory source) {
         return this
                 .setRate(source.getRate())
-                .setCategory(source.getCategory());
+                .setCategory(source.getCategory())
+                .setCurrency(source.currency);
     }
 
     @Override
     public VatCategory createNewInstance() {
         return new VatCategory()
-                .setRate(this.rate)
-                .setCategory(this.category);
+        // TODO set state
+                .update(this);
+    }
+
+    ///**** STATIC RESOUCES ****///
+
+    public static VatCategory factory(
+            BigDecimal rate,
+            String category,
+            String currency
+    ) {
+        return new VatCategory()
+                .setRate(rate)
+                .setCategory(category)
+                .setCurrency(currency);
     }
 }

@@ -41,7 +41,7 @@ public class BillingAccountDeserializer extends GenericDeserializer<BillingAccou
         val recipient = deserializeSubtree(node.get("recipient").toString(), contactDeserializer);
         val parameters = getBillingAccountParameters(node);
         return BillingAccount
-                .parse(type, customer, owner, recipient, parameters);
+                .factory(type, customer, owner, recipient, parameters);
     }
 
     private String getBillingAccountType(JsonNode node) {

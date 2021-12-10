@@ -47,7 +47,7 @@ public interface IInvoice extends IAmount {
 
 
 
-    default BigDecimal getTotalAmountIncludingVVat() {
+    default BigDecimal getTotalAmountIncludingVat() {
         return getTotalNetAmount().add(getTotalVatAmount());
     }
 

@@ -114,6 +114,10 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
 
 
+    ///**** CONSTRUCTORS ****///
+
+
+
     /**
      * Constructor
      *
@@ -162,24 +166,18 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      */
     @Override
     public AllowanceCharge update(AllowanceCharge source) {
-        return this;
+        if (this.state == State.NEW)
+            this.state = State.PREPARING;
+        preparingOrThrow("Cannot update in state " + this.state);
+        return this
+                .setCharge(source.isCharge())
+                .setSupplier(source.getSupplier())
+                .setBillingAccount(source.getBillingAccount())
+                .setCurrency(source.getCurrency());
     }
-
-
-
-    /**
-     *
-     * @return
-     */
-    @Override
-    public AllowanceCharge createNewInstance() {
-        return this.setState(State.NEW);
-    }
-
 
 
     ///**** STATIC RESOURCES ****///
-
 
 
     public enum State {

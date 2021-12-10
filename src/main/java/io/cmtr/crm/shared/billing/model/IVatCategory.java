@@ -23,6 +23,14 @@ public interface IVatCategory {
      *
      * @return
      */
+    String getCurrency();
+
+
+
+    /**
+     *
+     * @return
+     */
     BigDecimal getRate();
 
 

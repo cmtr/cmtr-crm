@@ -161,7 +161,7 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
                 .createNewInstance();
     }
 
-    public static BillingAccount parse(
+    public static BillingAccount factory(
             String type,
             Customer customer,
             AbstractContact owner,

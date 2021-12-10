@@ -9,14 +9,13 @@ import io.cmtr.crm.shared.contact.model.AbstractContact;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.hibernate.mapping.Collection;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -50,7 +49,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     /**
      *
      */
-    @NotNull
+    @NotNull(message = "State cannot be null")
     private State state;
 
 
@@ -151,7 +150,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
             joinColumns = { @JoinColumn(name = "invoice_id") },
             inverseJoinColumns = { @JoinColumn(name = "allowance_charge_id")}
     )
-    private Set<AllowanceCharge> allowanceCharges;
+    private Set<AllowanceCharge> allowanceCharges = Collections.EMPTY_SET;
 
 
 
@@ -232,14 +231,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     public Set<IVatCategory> getVatCategories() {
         return  allowanceCharges
                 .stream()
-                .map(e -> {
-                    if (e instanceof IDocumentLevelAllowanceCharge)
-                        return ((IDocumentLevelAllowanceCharge) e).getVatCategory();
-                    else if (e instanceof InvoiceLineItem)
-                        return ((InvoiceLineItem) e).getVatCategory();
-                    else
-                        throw new UnsupportedOperationException("Illegal allowance charge type stored as invoice allowance charge");
-                })
+                .map(this::getVatCategoryFromAllowanceCharge)
                 .collect(Collectors.toSet());
 
     }
@@ -248,13 +240,27 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
     /**
      *
+     * TODO - Make execution nicer
+     *
      * @return
      */
     @Override
     @Transient
     public List<IVatCategoryAmount> getVatCategoryAmounts() {
-        // TODO - when VatCategoryAmount is defined
-        return null;
+        final Map<VatCategory, VatCategoryAmount> categoryMap = new HashMap<>();
+        for (AllowanceCharge ac : allowanceCharges) {
+            final VatCategory vatCategory = getVatCategoryFromAllowanceCharge(ac);
+            VatCategoryAmount vatCategoryAmount = categoryMap
+                    .getOrDefault(vatCategory, VatCategoryAmount.factory(vatCategory, BigDecimal.ZERO));
+            VatCategoryAmount newVatCategoryAmount = ac.isCharge()
+                    ? vatCategoryAmount.add(ac.getAmount())
+                    : vatCategoryAmount.subtract(ac.getAmount());
+            categoryMap.put(vatCategory, newVatCategoryAmount);
+        }
+        return categoryMap
+                .values()
+                .stream()
+                .collect(Collectors.toList());
     }
 
 
@@ -365,7 +371,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     @Override
     public Invoice update(Invoice source) {
-        return null;
+        return this;
     }
 
 
@@ -493,5 +499,19 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     }
 
 
+
+    /**
+     *
+     * @param e
+     * @return
+     */
+    private VatCategory getVatCategoryFromAllowanceCharge(AllowanceCharge e) {
+        if (e instanceof IDocumentLevelAllowanceCharge)
+            return ((DocumentLevelAllowanceCharge) e).getVatCategory();
+        else if (e instanceof InvoiceLineItem)
+            return ((InvoiceLineItem) e).getVatCategory();
+        else
+            throw new UnsupportedOperationException("Illegal allowance charge type stored as invoice allowance charge");
+    }
 
 }

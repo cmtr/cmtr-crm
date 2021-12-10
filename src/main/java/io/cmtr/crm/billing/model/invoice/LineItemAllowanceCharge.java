@@ -37,7 +37,7 @@ public class LineItemAllowanceCharge extends AllowanceCharge implements IInvoice
     @Override
     public AllowanceCharge createNewInstance() {
         LineItemAllowanceCharge lineItemAllowanceCharge = new LineItemAllowanceCharge();
-        super.createNewInstance();
+        lineItemAllowanceCharge.setState(State.NEW);
         return lineItemAllowanceCharge;
     }
 }

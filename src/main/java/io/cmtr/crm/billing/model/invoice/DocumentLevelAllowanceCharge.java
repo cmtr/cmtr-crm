@@ -1,5 +1,7 @@
 package io.cmtr.crm.billing.model.invoice;
 
+import io.cmtr.crm.customer.model.BillingAccount;
+import io.cmtr.crm.customer.model.Supplier;
 import io.cmtr.crm.shared.billing.model.IDocumentLevelAllowanceCharge;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -38,6 +40,7 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     private VatCategory vatCategory;
 
 
+    private BigDecimal netAmount;
 
     /**
      *
@@ -54,8 +57,7 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
      */
     @Override
     public BigDecimal getAmount() {
-        // TODO
-        return null;
+        return getNetAmount();
     }
 
 
@@ -87,8 +89,12 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
         super.update(source);
         // if (source instanceof DocumentLevelAllowanceCharge src)
         // Unable to get language support for Java 17  (14) in Intellij
-        if (source instanceof DocumentLevelAllowanceCharge)
-            this.setVatCategory(((DocumentLevelAllowanceCharge) source).getVatCategory());
+        if (source instanceof DocumentLevelAllowanceCharge) {
+            DocumentLevelAllowanceCharge documentLevelAllowanceCharge = (DocumentLevelAllowanceCharge) source;
+            this.setVatCategory(documentLevelAllowanceCharge.getVatCategory());
+            this.setCurrency(getVatCategory().getCurrency());
+            this.setNetAmount(documentLevelAllowanceCharge.getNetAmount());
+        }
         return this;
     }
 
@@ -102,8 +108,29 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     public DocumentLevelAllowanceCharge createNewInstance() {
         DocumentLevelAllowanceCharge ac = new DocumentLevelAllowanceCharge();
         ac.setState(State.NEW);
-        ac.update(this);
-        return ac;
+        return ac.update(this);
+    }
+
+
+    ///*** STATIC RESOURCES ***///
+
+
+    public static DocumentLevelAllowanceCharge factory(
+            boolean isCharge,
+            Supplier supplier,
+            BillingAccount billingAccount,
+            VatCategory vatCategory,
+            BigDecimal netAmount
+    ) {
+        DocumentLevelAllowanceCharge documentLevelAllowanceCharge = new DocumentLevelAllowanceCharge()
+                .setVatCategory(vatCategory)
+                .setNetAmount(netAmount);
+        documentLevelAllowanceCharge
+                .setCharge(isCharge)
+                .setSupplier(supplier)
+                .setBillingAccount(billingAccount)
+                .setCurrency(vatCategory.getCurrency());
+        return documentLevelAllowanceCharge;
     }
 
 
