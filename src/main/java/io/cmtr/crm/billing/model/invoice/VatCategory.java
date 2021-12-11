@@ -15,6 +15,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
+/**
+ * VAT Category
+ *
+ * Value Added Tax Category Entity
+ *
+ * @author Harald Blikø
+ */
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,26 +29,58 @@ import java.math.BigDecimal;
 @Entity
 public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCategory {
 
+
+
+    /**
+     * Id
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+
+
+    /**
+     * VAT Rate as Percentage between 0 and 100
+     */
     @NotNull
     @PositiveOrZero
     @Max(100)
     private BigDecimal rate;
 
+
+
+    /**
+     * VAT Category Code
+     */
     @NotEmpty
     private String category;
 
+
+
+    /**
+     * Currency applicable for the VAT Category
+     *
+     * Introduced as a validation that a VAT Category is applicable for a single currency
+     *
+     */
     @NotEmpty
     private String currency;
 
     // private ZonedDateTime validFrom;
     // private ZonedDateTime validTo;
 
+
+
     ///*** SETTERS ***///
 
+
+
+    /**
+     *
+     * @param source
+     * @return
+     */
     @Override
     public VatCategory update(VatCategory source) {
         return this
@@ -50,6 +89,12 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
                 .setCurrency(source.currency);
     }
 
+
+
+    /**
+     *
+     * @return
+     */
     @Override
     public VatCategory createNewInstance() {
         return new VatCategory()
@@ -57,8 +102,25 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
                 .update(this);
     }
 
+
+
     ///**** STATIC RESOURCES ****///
 
+
+
+
+
+    ///**** FACTORIES ****///
+
+
+
+    /**
+     *
+     * @param rate
+     * @param category
+     * @param currency
+     * @return
+     */
     public static VatCategory factory(
             BigDecimal rate,
             String category,
@@ -69,4 +131,5 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
                 .setCategory(category)
                 .setCurrency(currency);
     }
+    
 }
