@@ -222,6 +222,8 @@ public abstract class AllowanceCharge implements GenericEntity<Long, AllowanceCh
     private void validateCompletion(Invoice invoice) {
         if (this.state != State.PREPARING)
             throw new IllegalStateException("Charge must be PREPARING to complete");
-        // TODO - Validate Billing Account and Supplier
+
+        if (!invoice.getSupplier().equals(this.supplier) || !invoice.getBillingAccount().equals(this.billingAccount))
+            throw new IllegalArgumentException("Cannot associate allowance charge with a invoice of different supplier and billing account");
     }
 }
