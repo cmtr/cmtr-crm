@@ -12,21 +12,16 @@ import java.util.List;
  *
  * @author Harald Blikø
  */
-public interface IInvoiceLineItem extends IAllowanceCharge, IQuantity {
+public interface IInvoiceLineItem extends IAllowanceCharge, IQuantity, IMonetary, IUnitPrice {
 
-    BigDecimal getGrossPrice();
-
-    BigDecimal getGrossPriceBaseQuantity();
-
-    BigDecimal getUnitPriceDiscount();
-
-    default BigDecimal getNetPrice() {
-        return getGrossPrice()
-                .multiply(getUnitPriceDiscount())
-                .divide(new BigDecimal("100"));
-    }
 
     IVatCategory getVatCategory();
+
+    @Override
+    default String getCurrency() {
+        return getVatCategory()
+                .getCurrency();
+    }
 
     default BigDecimal getTotalNetAmount() {
         return getAmount();
@@ -52,9 +47,9 @@ public interface IInvoiceLineItem extends IAllowanceCharge, IQuantity {
 
     @Override
     default BigDecimal getAmount() {
-        return getNetPrice()
-                .divide(getGrossPriceBaseQuantity())
+        return getUnitNetPrice()
                 .multiply(getQuantity())
+                .setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE)
                 .add(getTotalChargeNetAmount())
                 .subtract(getTotalAllowanceNetAmount());
     }

@@ -24,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "allowance_charge_type")
-public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity<Long, AllowanceCharge> {
+public abstract class AllowanceCharge implements GenericEntity<Long, AllowanceCharge>, IAllowanceCharge {
 
 
 
@@ -45,7 +45,9 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
 
     /**
+     * Is charge, or else allowance
      *
+     * Allowance - negative charge
      */
     private boolean charge;
 
@@ -105,15 +107,6 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
 
 
-    /**
-     *
-     * Charge currency
-     *
-     */
-    private String currency;
-
-
-
     ///**** CONSTRUCTORS ****///
 
 
@@ -166,14 +159,12 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
      */
     @Override
     public AllowanceCharge update(AllowanceCharge source) {
-        if (this.state == State.NEW)
-            this.state = State.PREPARING;
+        setStateToPrepareIfNew();
         preparingOrThrow("Cannot update in state " + this.state);
         return this
                 .setCharge(source.isCharge())
                 .setSupplier(source.getSupplier())
-                .setBillingAccount(source.getBillingAccount())
-                .setCurrency(source.getCurrency());
+                .setBillingAccount(source.getBillingAccount());
     }
 
 
@@ -190,6 +181,16 @@ public abstract class AllowanceCharge implements IAllowanceCharge, GenericEntity
 
 
     ///**** HELPER METHODS ****///
+
+
+
+    /**
+     *  Set states to PREPARING if NEW
+     */
+    protected void setStateToPrepareIfNew() {
+        if (this.state == State.NEW)
+            this.setState(State.PREPARING);
+    }
 
 
 

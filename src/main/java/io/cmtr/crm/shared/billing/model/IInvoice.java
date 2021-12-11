@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author Harald Blikø
  */
-public interface IInvoice extends IAmount {
+public interface IInvoice extends IAmount, IMonetary {
 
     List<IInvoiceLineItem> getLineItems();
 

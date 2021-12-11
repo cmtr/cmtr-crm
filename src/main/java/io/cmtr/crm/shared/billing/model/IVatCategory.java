@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  *
  * @author Harald Blikø
  */
-public interface IVatCategory {
+public interface IVatCategory extends IMonetary {
 
 
 
@@ -16,14 +16,6 @@ public interface IVatCategory {
      * @return
      */
     String getCategory();
-
-
-
-    /**
-     *
-     * @return
-     */
-    String getCurrency();
 
 
 

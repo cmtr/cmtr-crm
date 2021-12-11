@@ -29,10 +29,5 @@ public interface IAmount {
      */
     BigDecimal getAmount();
 
-    /**
-     *
-     * @return String - currency
-     */
-    String getCurrency();
 
 }

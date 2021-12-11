@@ -11,9 +11,13 @@ package io.cmtr.crm.shared.billing.model;
  * @author Harald Blikø
  *
  */
-public interface IDocumentLevelAllowanceCharge extends IAllowanceCharge {
+public interface IDocumentLevelAllowanceCharge extends IAllowanceCharge, IMonetary {
 
     IVatCategory getVatCategory();
 
-
+    @Override
+    default String getCurrency() {
+        return getVatCategory()
+                .getCurrency();
+    }
 }

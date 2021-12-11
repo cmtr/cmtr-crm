@@ -24,8 +24,8 @@ import java.math.BigDecimal;
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
 @Entity
-@DiscriminatorValue(DocumentLevelAllowanceCharge.DISCRIMINATOR_VALUE)
-public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDocumentLevelAllowanceCharge {
+@DiscriminatorValue(InvoiceDocumentLevelAllowanceCharge.DISCRIMINATOR_VALUE)
+public class InvoiceDocumentLevelAllowanceCharge extends AllowanceCharge implements IDocumentLevelAllowanceCharge {
 
 
 
@@ -42,12 +42,18 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     private VatCategory vatCategory;
 
 
-    private BigDecimal net;
 
     /**
      *
      */
-    public DocumentLevelAllowanceCharge() {
+    private BigDecimal net;
+
+
+
+    /**
+     *
+     */
+    public InvoiceDocumentLevelAllowanceCharge() {
         super(DISCRIMINATOR_VALUE);
     }
 
@@ -73,6 +79,18 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
         return getNetAmount();
     }
 
+
+
+    /**
+     *
+     * @return
+     */
+    @Override
+    @Transient
+    public String getCurrency() {
+        return vatCategory.getCurrency();
+    }
+
     ///**** SETTERS ****///
 
 
@@ -96,14 +114,13 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
      * @return
      */
     @Override
-    public DocumentLevelAllowanceCharge update(AllowanceCharge source) {
+    public InvoiceDocumentLevelAllowanceCharge update(AllowanceCharge source) {
         super.update(source);
-        // if (source instanceof DocumentLevelAllowanceCharge src)
+        // if (source instanceof InvoiceDocumentLevelAllowanceCharge src)
         // Unable to get language support for Java 17  (14) in Intellij
-        if (source instanceof DocumentLevelAllowanceCharge) {
-            DocumentLevelAllowanceCharge documentLevelAllowanceCharge = (DocumentLevelAllowanceCharge) source;
+        if (source instanceof InvoiceDocumentLevelAllowanceCharge) {
+            InvoiceDocumentLevelAllowanceCharge documentLevelAllowanceCharge = (InvoiceDocumentLevelAllowanceCharge) source;
             this.setVatCategory(documentLevelAllowanceCharge.getVatCategory());
-            this.setCurrency(getVatCategory().getCurrency());
             this.setNet(documentLevelAllowanceCharge.getNet());
         }
         return this;
@@ -116,8 +133,8 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
      * @return
      */
     @Override
-    public DocumentLevelAllowanceCharge createNewInstance() {
-        DocumentLevelAllowanceCharge ac = new DocumentLevelAllowanceCharge();
+    public InvoiceDocumentLevelAllowanceCharge createNewInstance() {
+        InvoiceDocumentLevelAllowanceCharge ac = new InvoiceDocumentLevelAllowanceCharge();
         ac.setState(State.NEW);
         return ac.update(this);
     }
@@ -126,21 +143,20 @@ public class DocumentLevelAllowanceCharge extends AllowanceCharge implements IDo
     ///*** STATIC RESOURCES ***///
 
 
-    public static DocumentLevelAllowanceCharge factory(
+    public static InvoiceDocumentLevelAllowanceCharge factory(
             boolean isCharge,
             Supplier supplier,
             BillingAccount billingAccount,
             VatCategory vatCategory,
             BigDecimal net
     ) {
-        DocumentLevelAllowanceCharge documentLevelAllowanceCharge = new DocumentLevelAllowanceCharge()
+        InvoiceDocumentLevelAllowanceCharge documentLevelAllowanceCharge = new InvoiceDocumentLevelAllowanceCharge()
                 .setVatCategory(vatCategory)
                 .setNet(net);
         documentLevelAllowanceCharge
                 .setCharge(isCharge)
                 .setSupplier(supplier)
-                .setBillingAccount(billingAccount)
-                .setCurrency(vatCategory.getCurrency());
+                .setBillingAccount(billingAccount);
         return documentLevelAllowanceCharge;
     }
 

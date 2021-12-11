@@ -9,7 +9,6 @@ import io.cmtr.crm.shared.contact.model.AbstractContact;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.mapping.Collection;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -313,7 +312,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @param allowanceCharge
      * @return
      */
-    public Invoice addDocumentLevelAllowanceCharge(@NotNull DocumentLevelAllowanceCharge allowanceCharge) {
+    public Invoice addDocumentLevelAllowanceCharge(@NotNull InvoiceDocumentLevelAllowanceCharge allowanceCharge) {
         setStateToPrepareIfNew();
         inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
         validateAllowanceCharge(allowanceCharge);
@@ -328,7 +327,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @param allowanceCharge
      * @return
      */
-    public Invoice removeDocumentLevelAllowanceCharge(DocumentLevelAllowanceCharge allowanceCharge) {
+    public Invoice removeDocumentLevelAllowanceCharge(InvoiceDocumentLevelAllowanceCharge allowanceCharge) {
         inPrepareOrThrow("Document Level Allowances and Charges can only be changed when state is IN PROGRESS");
         allowanceCharges.remove(allowanceCharge);
         return this;
@@ -452,8 +451,6 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * Validates that the state and allocation of the allowance charge meet requirements
      * for being added to a invoice
      *
-     * Validates the allowance currency equals the invoice currency.
-     *
      * @param allowanceCharge - allowance charge to be added to invoice
      */
     protected void validateAllowanceCharge(AllowanceCharge allowanceCharge) {
@@ -465,9 +462,8 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
         )
             throw new UnsupportedOperationException("A completed or deleted allowance charge cannot be added to a invoice");
 
-        setCurrencyIfNull(allowanceCharge.getCurrency());
-        if (!this.currency.equals(allowanceCharge.getCurrency()))
-            throw new UnsupportedOperationException("The allowance charge currency must match invoice currency");
+        if (!allowanceCharge.getSupplier().equals(this.supplier) || !allowanceCharge.getBillingAccount().equals(this.billingAccount))
+            throw new IllegalArgumentException("Allowance charge Billing account or Supplier does not match invoice");
     }
 
 
@@ -504,7 +500,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     private VatCategory getVatCategoryFromAllowanceCharge(AllowanceCharge e) {
         if (e instanceof IDocumentLevelAllowanceCharge)
-            return ((DocumentLevelAllowanceCharge) e).getVatCategory();
+            return ((InvoiceDocumentLevelAllowanceCharge) e).getVatCategory();
         else if (e instanceof InvoiceLineItem)
             return ((InvoiceLineItem) e).getVatCategory();
         else

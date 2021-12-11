@@ -34,114 +34,154 @@ class InvoiceTest {
             assertEquals(Invoice.State.NEW, invoice.getState(), "then state is NEW");
         }
 
-        @Nested
-        @DisplayName("and document level charges and allowances")
-        class AA {
-
-            final BigDecimal charge = new BigDecimal("150.333");
-            final BigDecimal allowance = new BigDecimal("77.456");
-            final VatCategory vatCategory = BillingTestUtil.getVatCategory();
-            Invoice invoice;
-            DocumentLevelAllowanceCharge documentLevelCharge;
-            DocumentLevelAllowanceCharge documentLevelAllowance;
-
-            @BeforeEach
-            void setUp() {
-                invoice = Invoice
-                        .factory(supplier, billingAccount)
-                        .createNewInstance();
-                documentLevelCharge = DocumentLevelAllowanceCharge
-                        .factory(true, supplier, billingAccount, vatCategory, charge)
-                        .createNewInstance();
-                documentLevelAllowance = DocumentLevelAllowanceCharge
-                        .factory(false, supplier, billingAccount, vatCategory, allowance)
-                        .createNewInstance();
-            }
-
-            @Test
-            void testSetup() {
-                assertEquals(AllowanceCharge.State.PREPARING, documentLevelCharge.getState());
-                assertTrue(supplier == documentLevelCharge.getSupplier());
-                assertEquals(supplier, documentLevelCharge.getSupplier());
-                assertEquals(AllowanceCharge.State.PREPARING, documentLevelAllowance.getState());
-                assertEquals(charge, documentLevelCharge.getNet());
-                assertEquals(allowance, documentLevelAllowance.getNet());
-                assertEquals(supplier, invoice.getSupplier());
-                assertEquals(billingAccount, invoice.getBillingAccount());
-            }
-
-            @Test
-            @DisplayName("when a invoice is created then")
-            void noCharge() {
-                assertEquals(supplier, invoice.getSupplier());
-                assertEquals(billingAccount, invoice.getBillingAccount());
-                assertEquals(BigDecimal.ZERO, invoice.getAmount(), "Amount - Net Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalNetAmount(), "Net Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalChargeNetAmount(), "Charge Net Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalAllowanceNetAmount(), "Allowance Net Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalLineItemNetAmount(), "Line Item Net Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalVatAmount(), "Total VAT Amount");
-                assertEquals(BigDecimal.ZERO, invoice.getTotalAmountIncludingVat(), "Total inc Vat");
-                assertEquals(Invoice.State.NEW, invoice.getState());
-            }
+        final BigDecimal charge = BillingTestUtil.DOCUMENT_CHARGE_NET;
+        final BigDecimal allowance = BillingTestUtil.DOCUMENT_ALLOWANCE_NET;
+        final VatCategory vatCategory = BillingTestUtil.getVatCategory();
+        final UnitPrice unitPrice = BillingTestUtil.getUnitPrice();
+        final Quantity quantity = BillingTestUtil.getQuantity();
+        final InvoiceDocumentLevelAllowanceCharge documentLevelCharge = InvoiceDocumentLevelAllowanceCharge
+                .factory(true, supplier, billingAccount, vatCategory, charge)
+                .createNewInstance();
+        final InvoiceDocumentLevelAllowanceCharge documentLevelAllowance = InvoiceDocumentLevelAllowanceCharge
+                .factory(false, supplier, billingAccount, vatCategory, allowance)
+                .createNewInstance();
+        final InvoiceLineItem lineItem = InvoiceLineItem
+                .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                .createNewInstance();
+        // final InvoiceLineItemAllowanceCharge lineItemCharge = InvoiceLineItemAllowanceCharge.
+                // .facotry(true, supplier, billingAccount,)
+        // final InvoiceLineItemAllowanceCharge lineItemAllowance = InvoiceLineItemAllowanceCharge;
 
 
-            @Test
-            @DisplayName("when a charge is added to a invoice then")
-            void withCharge() {
-                invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
-                BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
-                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
-                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
-            }
+        Invoice invoice;
 
-            @Test
-            @DisplayName("when a allowance is added to a invoice then")
-            void withAllowance() {
-                invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
-                BigDecimal net = allowance.negate().setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
-                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
-                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
-            }
-
-
-            @Test
-            @DisplayName("when a charge and allowance is added to a invoice then")
-            void withChargeAndAllowance() {
-                invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
-                invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
-                BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE)
-                        .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
-                assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
-                assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
-            }
-
-            @Nested
-            @DisplayName("and line items")
-            class AAA {
-
-                @Nested
-                @DisplayName("without line item charges")
-                class AAAA {
-
-
-
-                }
-
-                @Nested
-                @DisplayName("with line item charges")
-                class AAAB {
-
-                }
-
-                @Nested
-                @DisplayName("with and without  line items charges")
-                class AAAC {
-
-                }
-            }
+        @BeforeEach
+        void setUp() {
+            invoice = Invoice
+                    .factory(supplier, billingAccount)
+                    .createNewInstance();
         }
 
+
+        @Test
+        @DisplayName("when a invoice is created then")
+        void noCharge() {
+            assertEquals(supplier, invoice.getSupplier());
+            assertEquals(billingAccount, invoice.getBillingAccount());
+            assertEquals(BigDecimal.ZERO, invoice.getAmount(), "Amount - Net Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalNetAmount(), "Net Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalChargeNetAmount(), "Charge Net Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalAllowanceNetAmount(), "Allowance Net Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalLineItemNetAmount(), "Line Item Net Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalVatAmount(), "Total VAT Amount");
+            assertEquals(BigDecimal.ZERO, invoice.getTotalAmountIncludingVat(), "Total inc Vat");
+            assertEquals(Invoice.State.NEW, invoice.getState());
+            assertEquals(AllowanceCharge.State.PREPARING, documentLevelCharge.getState());
+            assertTrue(supplier == documentLevelCharge.getSupplier());
+            assertEquals(supplier, documentLevelCharge.getSupplier());
+            assertEquals(AllowanceCharge.State.PREPARING, documentLevelAllowance.getState());
+            assertEquals(charge, documentLevelCharge.getNet());
+            assertEquals(allowance, documentLevelAllowance.getNet());
+            assertEquals(supplier, invoice.getSupplier());
+            assertEquals(billingAccount, invoice.getBillingAccount());
+        }
+
+
+        @Test
+        @DisplayName("when a charge is added to a invoice then")
+        void withCharge() {
+            invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+            assertEquals(Invoice.State.PREPARE, invoice.getState());
+            BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
+            assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+            assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
+
+            BigDecimal vat = vatCategory.getVatAmount(net);
+            assertEquals(vat, invoice.getTotalVatAmount());
+        }
+
+        @Test
+        @DisplayName("when a allowance is added to a invoice then")
+        void withAllowance() {
+            invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
+            BigDecimal net = allowance.negate().setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
+            assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+            assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
+
+            BigDecimal vat = vatCategory.getVatAmount(net);
+            assertEquals(vat, invoice.getTotalVatAmount());
+        }
+
+
+        @Test
+        @DisplayName("when a charge and allowance is added to a invoice then")
+        void withChargeAndAllowance() {
+            invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
+            invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+            BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE)
+                    .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+            assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
+            assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");
+
+            BigDecimal vat = vatCategory.getVatAmount(net);
+            assertEquals(vat, invoice.getTotalVatAmount());
+        }
+
+        @Test
+        @DisplayName("when charge with different supplier and/or billing account is added then")
+        void withChargeOfDifferentSupplierBillingAccount() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> invoice.addDocumentLevelAllowanceCharge(BillingTestUtil.getDocumentLevelCharge()));
+        }
+
+
+        @Test
+        @DisplayName("when allowance with different supplier and/or billing account is added then")
+        void withAllowanceOfDifferentSupplierBillingAccount() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> invoice.addDocumentLevelAllowanceCharge(BillingTestUtil.getDocumentLevelCharge()));
+        }
+
+        @Test
+        @DisplayName("when charge with different supplier and/or billing account is added then")
+        void withLineItemOfDifferentSupplierBillingAccount() {
+            assertThrows(IllegalArgumentException.class,
+                    () -> invoice.addInvoiceLineItem(BillingTestUtil.getLineItem()));
+        }
+
+        @Test
+        @DisplayName("when a line item is added")
+        void withLineItem() {
+            invoice.addInvoiceLineItem(lineItem);
+            assertEquals(unitPrice.getNetAmount(quantity), invoice.getTotalNetAmount());
+        }
+
+
+        @Test
+        @DisplayName("when a line item with line item charge is added")
+        void withLineItemWithCharges() {
+
+        }
+
+        @Test
+        @DisplayName("when a line item with line item allowance is added")
+        void withLineItemWithAllowance() {
+
+        }
+
+
+        @Test
+        @DisplayName("when a line item with line item allowance and charge is added")
+        void withLineItemWithAllowanceAndCharge() {
+
+        }
+
+        @Test
+        @DisplayName("when a document level allowance and charge, and" +
+                " line item with line item allowance and charge is added ")
+        void withDocumentLevelAllowanceAndChargeAndLineItemWithLineItemAllowanceAndCharge() {
+
+        }
 
     }
 
