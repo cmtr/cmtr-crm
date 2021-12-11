@@ -246,9 +246,9 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     @Override
     @Transient
     public List<IVatCategoryAmount> getVatCategoryAmounts() {
-        final Map<VatCategory, VatCategoryAmount> categoryMap = new HashMap<>();
+        final Map<IVatCategory, VatCategoryAmount> categoryMap = new HashMap<>();
         for (AllowanceCharge ac : allowanceCharges) {
-            final VatCategory vatCategory = getVatCategoryFromAllowanceCharge(ac);
+            final IVatCategory vatCategory = getVatCategoryFromAllowanceCharge(ac);
             VatCategoryAmount vatCategoryAmount = categoryMap
                     .getOrDefault(vatCategory, VatCategoryAmount.factory(vatCategory, BigDecimal.ZERO));
             VatCategoryAmount newVatCategoryAmount = ac.isCharge()
@@ -287,11 +287,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     public Invoice addInvoiceLineItem(@NotNull InvoiceLineItem lineItem) {
         setStateToPrepareIfNew();
         inPrepareOrThrow("Invoice lines can only be added in state NEW or IN PROGRESS");
+        validateLineItem(lineItem);
         allowanceCharges.add(lineItem);
         return this;
     }
-
-
 
     /**
      *
@@ -367,7 +366,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     @Override
     public Invoice update(Invoice source) {
-        return this;
+        inNewOrThrow("A invoice can only be updated in NEW state");
+        return this
+            .setSupplier(source.supplier)
+            .setBillingAccount(source.billingAccount);
     }
 
 
@@ -380,8 +382,6 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     public Invoice createNewInstance() {
         return new Invoice()
                 .setState(State.NEW)
-                .setSupplier(this.supplier)
-                .setBillingAccount(this.billingAccount)
                 .update(this);
     }
 
@@ -448,6 +448,17 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
 
     /**
+     *
+     * @param message
+     */
+    private void inNewOrThrow(String message) {
+        if (this.state != State.NEW)
+            throw new IllegalStateException(message);
+    }
+
+
+
+    /**
      * Validates that the state and allocation of the allowance charge meet requirements
      * for being added to a invoice
      *
@@ -462,20 +473,31 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
         )
             throw new UnsupportedOperationException("A completed or deleted allowance charge cannot be added to a invoice");
 
-        if (!allowanceCharge.getSupplier().equals(this.supplier) || !allowanceCharge.getBillingAccount().equals(this.billingAccount))
-            throw new IllegalArgumentException("Allowance charge Billing account or Supplier does not match invoice");
+        if (isMatchBetweenSupplierAndBillingAccount(allowanceCharge))
+            throw new IllegalArgumentException("Allowance charge Billing Account or Supplier does not match invoice");
     }
 
 
 
     /**
      *
-     * @param currency
+     * @param allowanceCharge
+     * @return
      */
-    private void setCurrencyIfNull(String currency) {
-        if (this.currency == null)
-            this.currency = currency;
+    private boolean isMatchBetweenSupplierAndBillingAccount(AllowanceCharge allowanceCharge) {
+        return !allowanceCharge.getSupplier().equals(this.supplier) || !allowanceCharge.getBillingAccount().equals(this.billingAccount);
     }
+
+
+
+    /**
+     *
+     * @param lineItem
+     */
+    private void validateLineItem(InvoiceLineItem lineItem) {
+        validateAllowanceCharge(lineItem);
+    }
+
 
 
     /**
@@ -498,13 +520,11 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @param e
      * @return
      */
-    private VatCategory getVatCategoryFromAllowanceCharge(AllowanceCharge e) {
-        if (e instanceof IDocumentLevelAllowanceCharge)
-            return ((InvoiceDocumentLevelAllowanceCharge) e).getVatCategory();
-        else if (e instanceof InvoiceLineItem)
-            return ((InvoiceLineItem) e).getVatCategory();
-        else
-            throw new UnsupportedOperationException("Illegal allowance charge type stored as invoice allowance charge");
+    private IVatCategory getVatCategoryFromAllowanceCharge(AllowanceCharge e) {
+        if (e instanceof IVatCategory) return (IVatCategory) e;
+        if (e instanceof IDocumentLevelAllowanceCharge) return ((InvoiceDocumentLevelAllowanceCharge) e).getVatCategory();
+        if (e instanceof IInvoiceLineItem) return ((IInvoiceLineItem) e).getVatCategory();
+        throw new UnsupportedOperationException("Illegal allowance charge type stored as invoice allowance charge");
     }
 
 }

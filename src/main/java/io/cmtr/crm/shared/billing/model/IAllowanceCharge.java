@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  *
  * @author Harald Blikø
  */
-public interface IAllowanceCharge extends IAmount {
+public interface IAllowanceCharge extends IAmount, IMonetary {
 
     boolean isCharge();
 

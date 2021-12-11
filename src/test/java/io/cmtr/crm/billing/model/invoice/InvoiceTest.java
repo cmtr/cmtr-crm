@@ -48,9 +48,12 @@ class InvoiceTest {
         final InvoiceLineItem lineItem = InvoiceLineItem
                 .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
                 .createNewInstance();
-        // final InvoiceLineItemAllowanceCharge lineItemCharge = InvoiceLineItemAllowanceCharge.
-                // .facotry(true, supplier, billingAccount,)
-        // final InvoiceLineItemAllowanceCharge lineItemAllowance = InvoiceLineItemAllowanceCharge;
+        final InvoiceLineItemAllowanceCharge lineItemCharge = InvoiceLineItemAllowanceCharge
+                .factory(true, supplier, billingAccount, charge)
+                .createNewInstance();
+        final InvoiceLineItemAllowanceCharge lineItemAllowance = InvoiceLineItemAllowanceCharge
+                .factory(false, supplier, billingAccount, allowance)
+                .createNewInstance();
 
 
         Invoice invoice;
@@ -160,12 +163,21 @@ class InvoiceTest {
         @Test
         @DisplayName("when a line item with line item charge is added")
         void withLineItemWithCharges() {
-
+            InvoiceLineItem lineItem = InvoiceLineItem
+                    .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                    .createNewInstance();
+            lineItem.addAllowanceCharge(lineItemCharge);
+            invoice.addInvoiceLineItem(lineItem);
         }
 
         @Test
         @DisplayName("when a line item with line item allowance is added")
         void withLineItemWithAllowance() {
+            InvoiceLineItem lineItem = InvoiceLineItem
+                    .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                    .createNewInstance();
+            lineItem.addAllowanceCharge(lineItemAllowance);
+            invoice.addInvoiceLineItem(lineItem);
 
         }
 
@@ -173,14 +185,26 @@ class InvoiceTest {
         @Test
         @DisplayName("when a line item with line item allowance and charge is added")
         void withLineItemWithAllowanceAndCharge() {
-
+            InvoiceLineItem lineItem = InvoiceLineItem
+                    .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                    .createNewInstance();
+            lineItem.addAllowanceCharge(lineItemCharge);
+            lineItem.addAllowanceCharge(lineItemAllowance);
+            invoice.addInvoiceLineItem(lineItem);
         }
 
         @Test
         @DisplayName("when a document level allowance and charge, and" +
                 " line item with line item allowance and charge is added ")
         void withDocumentLevelAllowanceAndChargeAndLineItemWithLineItemAllowanceAndCharge() {
-
+            InvoiceLineItem lineItem = InvoiceLineItem
+                    .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                    .createNewInstance();
+            lineItem.addAllowanceCharge(lineItemCharge);
+            lineItem.addAllowanceCharge(lineItemAllowance);
+            invoice.addInvoiceLineItem(lineItem);
+            invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+            invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
         }
 
     }

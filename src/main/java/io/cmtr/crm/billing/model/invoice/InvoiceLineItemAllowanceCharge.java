@@ -12,6 +12,7 @@ import lombok.experimental.Accessors;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
+import javax.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 
 @Getter
@@ -24,10 +25,15 @@ public class InvoiceLineItemAllowanceCharge extends AllowanceCharge implements I
     public static final String DISCRIMINATOR_VALUE = "LINE_ITEM_AC";
 
 
+    /**
+     *
+     */
+    private String currency;
 
     /**
      *
      */
+    @PositiveOrZero(message = "Allowance charge net must always be positive")
     private BigDecimal net;
 
 
@@ -62,7 +68,9 @@ public class InvoiceLineItemAllowanceCharge extends AllowanceCharge implements I
         return getNetAmount();
     }
 
-///**** SETTERS ****///
+
+
+    ///**** SETTERS ****///
 
 
 
@@ -72,8 +80,14 @@ public class InvoiceLineItemAllowanceCharge extends AllowanceCharge implements I
      * @return
      */
     @Override
-    public AllowanceCharge update(AllowanceCharge source) {
-        return super.update(source);
+    public InvoiceLineItemAllowanceCharge update(AllowanceCharge source) {
+        super.update(source);
+        this.setCurrency(source.getCurrency());
+        if (source instanceof InvoiceLineItemAllowanceCharge) {
+            InvoiceLineItemAllowanceCharge src = (InvoiceLineItemAllowanceCharge) source;
+            this.setNet(src.getNet());
+        }
+        return this;
     }
 
 
@@ -83,14 +97,27 @@ public class InvoiceLineItemAllowanceCharge extends AllowanceCharge implements I
      * @return
      */
     @Override
-    public AllowanceCharge createNewInstance() {
+    public InvoiceLineItemAllowanceCharge createNewInstance() {
         InvoiceLineItemAllowanceCharge lineItemAllowanceCharge = new InvoiceLineItemAllowanceCharge();
         lineItemAllowanceCharge.setState(State.NEW);
-        return lineItemAllowanceCharge;
+        return lineItemAllowanceCharge.update(this);
     }
 
 
-    public InvoiceLineItemAllowanceCharge factory(
+
+    ///**** FACTORIES ****∕∕∕
+
+
+
+    /**
+     *
+     * @param charge
+     * @param supplier
+     * @param billingAccount
+     * @param net
+     * @return
+     */
+    public static InvoiceLineItemAllowanceCharge factory(
             boolean charge, Supplier supplier, BillingAccount billingAccount, BigDecimal net
     ) {
         InvoiceLineItemAllowanceCharge lineItemAllowanceCharge = new InvoiceLineItemAllowanceCharge();
@@ -98,7 +125,9 @@ public class InvoiceLineItemAllowanceCharge extends AllowanceCharge implements I
                 .setCharge(charge)
                 .setSupplier(supplier)
                 .setBillingAccount(billingAccount);
-        return lineItemAllowanceCharge;
+        return lineItemAllowanceCharge
+                .setNet(net);
     }
+
 
 }

@@ -131,5 +131,5 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
                 .setCategory(category)
                 .setCurrency(currency);
     }
-    
+
 }
