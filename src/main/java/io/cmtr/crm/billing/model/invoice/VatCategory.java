@@ -57,7 +57,7 @@ public class VatCategory implements GenericEntity<Long, VatCategory>, IVatCatego
                 .update(this);
     }
 
-    ///**** STATIC RESOUCES ****///
+    ///**** STATIC RESOURCES ****///
 
     public static VatCategory factory(
             BigDecimal rate,
