@@ -8,6 +8,9 @@ import io.cmtr.crm.shared.billing.model.IAmount;
 import org.junit.jupiter.api.*;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,19 +23,9 @@ class InvoiceTest {
 
     @Nested
     @DisplayName(
-            "Given a supplier and billing account"
+            "Given a invoice with a supplier and billing account"
     )
-    class A {
-
-
-        @Test
-        @DisplayName("when a invoice is initiated")
-        void testFactory() {
-            Invoice invoice = Invoice
-                    .factory(supplier, billingAccount)
-                    .createNewInstance();
-            assertEquals(Invoice.State.NEW, invoice.getState(), "then state is NEW");
-        }
+    class NewInvoice {
 
         final BigDecimal charge = BillingTestUtil.DOCUMENT_CHARGE_NET;
         final BigDecimal allowance = BillingTestUtil.DOCUMENT_ALLOWANCE_NET;
@@ -67,8 +60,9 @@ class InvoiceTest {
 
 
         @Test
-        @DisplayName("when a invoice is created then")
+        @DisplayName("when it is created then")
         void noCharge() {
+            assertEquals(Invoice.State.NEW, invoice.getState(), "then state is NEW");
             assertEquals(supplier, invoice.getSupplier());
             assertEquals(billingAccount, invoice.getBillingAccount());
             assertEquals(BigDecimal.ZERO, invoice.getAmount(), "Amount - Net Amount");
@@ -156,7 +150,8 @@ class InvoiceTest {
         @DisplayName("when a line item is added")
         void withLineItem() {
             invoice.addInvoiceLineItem(lineItem);
-            assertEquals(unitPrice.getNetAmount(quantity), invoice.getTotalNetAmount());
+            BigDecimal net = unitPrice.getNetAmount(quantity);
+            assertEquals(net, invoice.getTotalNetAmount());
         }
 
 
@@ -168,6 +163,10 @@ class InvoiceTest {
                     .createNewInstance();
             lineItem.addAllowanceCharge(lineItemCharge);
             invoice.addInvoiceLineItem(lineItem);
+            BigDecimal net = unitPrice
+                    .getNetAmount(quantity)
+                    .add(charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+            assertEquals(net, invoice.getTotalNetAmount());
         }
 
         @Test
@@ -178,7 +177,10 @@ class InvoiceTest {
                     .createNewInstance();
             lineItem.addAllowanceCharge(lineItemAllowance);
             invoice.addInvoiceLineItem(lineItem);
-
+            BigDecimal net = unitPrice
+                    .getNetAmount(quantity)
+                    .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+            assertEquals(net, invoice.getTotalNetAmount());
         }
 
 
@@ -191,6 +193,11 @@ class InvoiceTest {
             lineItem.addAllowanceCharge(lineItemCharge);
             lineItem.addAllowanceCharge(lineItemAllowance);
             invoice.addInvoiceLineItem(lineItem);
+            BigDecimal net = unitPrice
+                    .getNetAmount(quantity)
+                    .add(charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE))
+                    .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+            assertEquals(net, invoice.getTotalNetAmount());
         }
 
         @Test
@@ -199,14 +206,78 @@ class InvoiceTest {
         void withDocumentLevelAllowanceAndChargeAndLineItemWithLineItemAllowanceAndCharge() {
             InvoiceLineItem lineItem = InvoiceLineItem
                     .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
-                    .createNewInstance();
-            lineItem.addAllowanceCharge(lineItemCharge);
-            lineItem.addAllowanceCharge(lineItemAllowance);
-            invoice.addInvoiceLineItem(lineItem);
-            invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
-            invoice.addDocumentLevelAllowanceCharge(documentLevelAllowance);
+                    .createNewInstance()
+                    .addAllowanceCharge(lineItemCharge)
+                    .addAllowanceCharge(lineItemAllowance);
+            invoice
+                    .addInvoiceLineItem(lineItem)
+                    .addDocumentLevelAllowanceCharge(documentLevelCharge)
+                    .addDocumentLevelAllowanceCharge(documentLevelAllowance);
+            BigDecimal net = unitPrice
+                    .getNetAmount(quantity)
+                    .add(charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE))
+                    .add(charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE))
+                    .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE))
+                    .subtract(allowance.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE));
+            assertEquals(net, invoice.getTotalNetAmount());
         }
 
+        @Test
+        @DisplayName("when updating the supplier and billing account in NEW state")
+        void updatingSupplierWhenNew() {
+            Invoice other = Invoice.factory(CustomerTestUtil.getSupplier(), CustomerTestUtil.getBillingAccount());
+            invoice.update(other);
+            assertEquals(other.getSupplier(), invoice.getSupplier());
+            assertEquals(other.getBillingAccount(), invoice.getBillingAccount());
+        }
+
+        @Test
+        @DisplayName("when updating the supplier and billing account in NOT new state")
+        void updatingSupplierWhenNotNew() {
+            invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
+            assertThrows(IllegalStateException.class,
+                    () -> invoice.update(Invoice.factory(CustomerTestUtil.getSupplier(), CustomerTestUtil.getBillingAccount())));
+        }
+
+
+        @Test
+        @DisplayName("when completing with charges, allowances and invoice lines")
+        void completingInvoice() {
+            InvoiceLineItem lineItem = InvoiceLineItem
+                    .factory(supplier, billingAccount, vatCategory, unitPrice, quantity)
+                    .createNewInstance()
+                    .addAllowanceCharge(lineItemCharge)
+                    .addAllowanceCharge(lineItemAllowance);
+            invoice
+                    .addInvoiceLineItem(lineItem)
+                    .addDocumentLevelAllowanceCharge(documentLevelCharge)
+                    .addDocumentLevelAllowanceCharge(documentLevelAllowance);
+            invoice.complete();
+            assertEquals(Invoice.State.COMPLETE, invoice.getState());
+            List<AllowanceCharge> allowanceChargeList = invoice
+                    .getAllowanceCharges()
+                    .stream()
+                    .map(e -> (AllowanceCharge) e)
+                    .collect(Collectors.toList());
+            allowanceChargeList.addAll(invoice
+                    .getLineItems()
+                    .stream()
+                    .flatMap(e -> ((InvoiceLineItem) e).getAllowanceCharges().stream().map(i -> (AllowanceCharge) i))
+                    .collect(Collectors.toList()));
+            Predicate<AllowanceCharge> allowanceChargePredicate = e ->
+                    e.getState() == AllowanceCharge.State.COMPLETE &&
+                    e.getInvoice().equals(invoice);
+            assertTrue(allowanceChargeList.stream().allMatch(allowanceChargePredicate));
+            assertNotEquals(billingAccount.getOwner(), invoice.getOwner());
+            assertNotNull(invoice.getOwner());
+            assertNotEquals(billingAccount.getRecipient(), invoice.getRecipient());
+            assertNotNull(invoice.getRecipient());
+            assertNotEquals(billingAccount.getOwner(), invoice.getIssuer());
+            assertNotNull(invoice.getIssuer());
+            assertNotNull(invoice.getIssueDate());
+        }
     }
+
+
 
 }

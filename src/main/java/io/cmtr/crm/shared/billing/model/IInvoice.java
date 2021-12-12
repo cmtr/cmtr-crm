@@ -22,6 +22,7 @@ public interface IInvoice extends IAmount, IMonetary {
         return getLineItems()
                 .stream()
                 .map(IInvoiceLineItem::getTotalNetAmount)
+                // TODO - Differentiate between charge and allowance
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
