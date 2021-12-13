@@ -22,9 +22,7 @@ class InvoiceTest {
 
 
     @Nested
-    @DisplayName(
-            "Given a invoice with a supplier and billing account"
-    )
+    @DisplayName("Given a invoice with a supplier and billing account")
     class NewInvoice {
 
         final BigDecimal charge = BillingTestUtil.DOCUMENT_CHARGE_NET;

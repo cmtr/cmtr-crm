@@ -11,18 +11,62 @@ import javax.persistence.EntityNotFoundException;
 import javax.transaction.Transactional;
 
 
-public abstract class GenericService<R, T extends GenericEntity<R, T>> {
+/**
+ * Abstract Generic Service
+ *
+ * @param <R> identifier type
+ * @param <T> entity class
+ *
+ *
+ * @author Harald Blikø
+ */
+public abstract class GenericService<R, T extends GenericEntity<R, T>> implements IGenericService<R, T> {
 
+
+
+    /**
+     *
+     */
     protected final GenericRepository<R, T> repository;
 
+
+
+    ///**** CONSTRUCTORS ****///
+
+
+
+    /**
+     *
+     * @param repository
+     */
     public GenericService(GenericRepository<R, T> repository) {
         this.repository = repository;
     }
 
+
+
+    ///**** GETTERS ****///
+
+
+
+    /**
+     *
+     * @param pageable
+     * @return
+     */
+    @Override
     public Page<T> getPage(Pageable pageable){
         return repository.findAll(pageable);
     }
 
+
+
+    /**
+     *
+     * @param id
+     * @return
+     */
+    @Override
     public T get(R id){
         return repository
                 .findById(id)
@@ -30,6 +74,18 @@ public abstract class GenericService<R, T extends GenericEntity<R, T>> {
                         String.format("Entity with id '%s'not found", id)));
     }
 
+
+
+    ///**** SETTERS ****///
+
+
+
+    /**
+     *
+     * @param newDomain
+     * @return
+     */
+    @Override
     @Transactional
     public T create(T newDomain){
         T dbDomain = newDomain.createNewInstance();
@@ -38,6 +94,15 @@ public abstract class GenericService<R, T extends GenericEntity<R, T>> {
                 .save(dbDomain);
     }
 
+
+
+    /**
+     *
+     * @param id
+     * @param updated
+     * @return
+     */
+    @Override
     @Transactional
     public T update(R id, T updated){
         T dbDomain = get(id);
@@ -48,10 +113,25 @@ public abstract class GenericService<R, T extends GenericEntity<R, T>> {
                 .save(dbDomain);
     }
 
+
+
+    /**
+     *
+     * @param updated
+     * @return
+     */
+    @Override
     public T update(T updated){
         return update(updated.getId(), updated);
     }
 
+
+
+    /**
+     *
+     * @param id
+     */
+    @Override
     @Transactional
     public void delete(R id){
         //check if object with this id exists
@@ -61,8 +141,18 @@ public abstract class GenericService<R, T extends GenericEntity<R, T>> {
                 .deleteById(id);
     }
 
-    protected void publish(T current, T prev, CrudEventType type) {
+
+
+    /**
+     *
+     * @param current
+     * @param prev
+     * @param type
+     */
+    @Override
+    public void publish(T current, T prev, CrudEventType type) {
 
     }
+
 
 }

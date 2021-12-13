@@ -2,8 +2,16 @@ package io.cmtr.crm.billing.service;
 
 import io.cmtr.crm.billing.model.billcycle.BillCycle;
 import io.cmtr.crm.customer.model.BillingAccount;
+import io.cmtr.crm.shared.generic.service.IGenericService;
 
-public interface IBillCycleService {
+import java.util.UUID;
 
-    BillingAccount moveBillCycle(BillingAccount billingAccount, BillCycle billCycle);
+/**
+ *
+ * @author Harald Blikø
+ *
+ */
+public interface IBillCycleService extends IGenericService<UUID, BillCycle> {
+
+
 }

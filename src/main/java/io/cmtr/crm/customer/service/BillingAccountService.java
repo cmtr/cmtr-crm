@@ -29,7 +29,7 @@ public class BillingAccountService extends GenericService<UUID, BillingAccount> 
     }
 
     @Override
-    protected void publish(BillingAccount current, BillingAccount prev, CrudEventType type) {
+    public void publish(BillingAccount current, BillingAccount prev, CrudEventType type) {
         super.publish(current, prev, type);
         System.out.printf("Billing Account Event of '%s'%n", type);
     }

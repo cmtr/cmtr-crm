@@ -339,7 +339,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @return
      */
     public Invoice complete() {
-        inPrepareOrThrow("A invoice can only be set to COMPLETE when in state IN PROGRESS");
+        inPrepareOrThrow("A invoice can only be set to COMPLETED when in state IN PROGRESS");
         this.state = State.COMPLETE;
         finalizeEntity();
         this.allowanceCharges.forEach(ac -> ac.complete(this));
@@ -402,6 +402,10 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     }
 
 
+    public static Invoice factory(Long id) {
+        return new Invoice()
+                .setId(id);
+    }
 
 
     ///**** STATIC RESOURCES ****∕∕∕

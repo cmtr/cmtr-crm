@@ -38,7 +38,7 @@ public class CustomerService extends GenericService<UUID, Customer> {
     }
 
     @Override
-    protected void publish(Customer current, Customer prev, CrudEventType type) {
+    public void publish(Customer current, Customer prev, CrudEventType type) {
         super.publish(current, prev, type);
         applicationEventPublisher.publishEvent(new CustomerEvent(current, prev, type));
     }

@@ -15,9 +15,4 @@ public class BillCycleService extends GenericService<UUID, BillCycle> implements
         super(repository);
     }
 
-    @Override
-    public BillingAccount moveBillCycle(BillingAccount billingAccount, BillCycle billCycle) {
-        return null;
-    }
-
 }
