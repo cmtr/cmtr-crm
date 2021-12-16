@@ -9,6 +9,10 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.*;
 
+/**
+ *
+ * @author Harald Blikø
+ */
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
@@ -36,11 +40,21 @@ import javax.persistence.*;
 )
 public abstract class AbstractContact implements GenericEntity<Long, AbstractContact> {
 
+
+
+    /**
+     *
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @JsonIgnore
     private Long id;
 
+
+
+    /**
+     *
+     */
     @Column(
             name = "contact_type",
             insertable = false,
@@ -51,6 +65,9 @@ public abstract class AbstractContact implements GenericEntity<Long, AbstractCon
 
 
 
+    /**
+     *
+     */
     @OneToOne(
             cascade = CascadeType.ALL,
             optional = false,
@@ -58,12 +75,44 @@ public abstract class AbstractContact implements GenericEntity<Long, AbstractCon
     )
     private AbstractAddress address;
 
+
+
+    /**
+     *
+     */
+    private String email;
+
+
+    ///**** CONSTRUCTORS ****///
+
+
+
+    /**
+     *
+     * @param type
+     */
     AbstractContact(String type) {
         this.type = type;
     }
 
+
+
+    ///**** SETTERS ****///
+
+
+
+    /**
+     *
+     * @param source
+     * @return
+     */
     @Override
     public AbstractContact update(AbstractContact source) {
-        return this;
+        return this
+                .setEmail(source.getEmail())
+                .setAddress(source.getAddress());
     }
+
+
+
 }

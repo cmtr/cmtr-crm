@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @Getter
@@ -21,6 +22,18 @@ public class Supplier extends Customer {
 
     protected  Supplier() {
         super(DISCRIMINATOR_VALUE);
+    }
+
+    /**
+     *
+     * Type cannot be modified for a supplier
+     *
+     * @param type - string any value
+     * @return Supplier
+     */
+    @Override
+    protected Customer setType(@NotNull(message = "Customer type cannot be null") String type) {
+        return super.setType(DISCRIMINATOR_VALUE);
     }
 
     @Override
@@ -40,7 +53,6 @@ public class Supplier extends Customer {
     ) {
         return (Supplier) new Supplier()
             .setParameters(parameters)
-            .setCustomer(customer)
-            .setEmail(email);
+            .setCustomer(customer);
     }
 }
