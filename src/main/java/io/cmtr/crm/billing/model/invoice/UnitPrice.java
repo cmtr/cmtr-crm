@@ -24,7 +24,7 @@ public final class UnitPrice implements IUnitPrice {
 
 
     /**
-     *  Unit Price Currency
+     *  Unit AbstractPrice Currency
      */
     private final String currency;
 
@@ -38,7 +38,7 @@ public final class UnitPrice implements IUnitPrice {
 
 
     /**
-     * Gross Price for base quantity
+     * Gross AbstractPrice for base quantity
      */
     private final BigDecimal grossPrice;
 

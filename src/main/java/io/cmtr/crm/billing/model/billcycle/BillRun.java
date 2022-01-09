@@ -18,6 +18,7 @@ import lombok.experimental.Accessors;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -86,20 +87,30 @@ public class BillRun implements GenericEntity<Long, BillRun> {
     /**
      *
      */
-    @ManyToOne(
+    @ManyToMany(
             fetch = FetchType.LAZY
     )
-    private Set<BillingAccount> billingAccounts;
+    @JoinTable(
+            name = "billing_account_bill_runs",
+            joinColumns = { @JoinColumn(name = "bill_run_id") },
+            inverseJoinColumns = { @JoinColumn(name = "billing_account_id") }
+    )
+    private Set<BillingAccount> billingAccounts = new HashSet<>();
 
 
 
     /**
      *
      */
-    @ManyToOne(
+    @ManyToMany(
             fetch = FetchType.LAZY
     )
-    private Set<Invoice> invoices;
+    @JoinTable(
+            name = "billing_run_invoices",
+            joinColumns = { @JoinColumn(name = "bill_run_id") },
+            inverseJoinColumns = { @JoinColumn(name = "invoice_id") }
+    )
+    private Set<Invoice> invoices = new HashSet<>();
 
 
 

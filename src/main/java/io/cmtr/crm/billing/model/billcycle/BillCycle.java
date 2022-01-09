@@ -8,10 +8,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
@@ -114,6 +117,11 @@ public abstract class BillCycle implements GenericEntity<UUID, BillCycle> {
     @ManyToMany(
             fetch = FetchType.LAZY
     )
+    @JoinTable(
+            name = "billing_account_bill_cycles",
+            joinColumns = { @JoinColumn(name = "bill_cycle_id") },
+            inverseJoinColumns = { @JoinColumn(name = "billing_account_id") }
+    )
     private Set<BillingAccount> billingAccounts = new HashSet<>();
 
 
@@ -129,6 +137,22 @@ public abstract class BillCycle implements GenericEntity<UUID, BillCycle> {
     @MapKeyColumn(name = "key")
     @Column(name = "value")
     private Map<String, String> parameters;
+
+
+
+    /**
+     *
+     */
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+
+
+    /**
+     *
+     */
+    @UpdateTimestamp
+    private LocalDateTime modifiedAt;
 
 
 
