@@ -15,8 +15,7 @@ public class CustomerTestUtil {
         return (Supplier) Supplier
                 .factory(
                         Collections.emptyMap(),
-                        ContactTestUtil.getBusinessContact(),
-                        "email@company.com"
+                        ContactTestUtil.getBusinessContact()
                 )
                 .createNewInstance();
     }
