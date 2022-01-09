@@ -10,7 +10,13 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.function.Supplier;
 
+/**
+ *
+ * @param <R>
+ * @param <T>
+ */
 public abstract class GenericRestController<R, T extends GenericEntity<R,T>> {
 
     private final GenericService<R, T> service;
@@ -18,55 +24,94 @@ public abstract class GenericRestController<R, T extends GenericEntity<R,T>> {
     public GenericRestController(GenericService<R, T> service) {
         this.service = service;
     }
-    
+
+
+
+    /**
+     *
+     * @param pageable
+     * @return
+     */
     @GetMapping("")
     public ResponseEntity<Page<T>> getPage(Pageable pageable){
-        return ResponseEntity.ok(service.getPage(pageable));
+        return handleException(() -> ResponseEntity.ok(service.getPage(pageable)));
     }
 
+
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     @GetMapping("/{id}")
     public ResponseEntity<T> getOne(@PathVariable R id) {
-        try {
-            return ResponseEntity.ok(service.get(id));
-        } catch (EntityNotFoundException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
-        }
+        return handleException(() -> ResponseEntity.ok(service.get(id)));
+
     }
 
+
+
+    /**
+     *
+     * @param created
+     * @return
+     */
     @PostMapping("")
     public ResponseEntity<T> create(@RequestBody T created) {
-        // try {
-            return ResponseEntity.ok(service.create(created));
-        // }
-        /*
-        catch (ValidationException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
-        } */
+        return handleException(() -> ResponseEntity.ok(service.create(created)));
     }
 
+
+
+    /**
+     *
+     * @param id
+     * @param updated
+     * @return
+     */
     @PutMapping("/{id}")
     public ResponseEntity<T> update(
             @PathVariable R id,
             @RequestBody T updated
     ) {
-        try {
-            return ResponseEntity.ok(service.update(id, updated));
-        } catch (EntityNotFoundException ex) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
-        } /*
-        catch (ValidationException ex) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
-        } */
+        return handleException(() -> ResponseEntity.ok(service.update(id, updated)));
     }
 
+
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable R id) {
-        try {
+        return handleException(() -> {
             service.delete(id);
             return ResponseEntity.ok("Ok");
+        });
+    }
+
+
+
+    /**
+     *
+     * @param supplier
+     * @param <T>
+     * @return
+     */
+    public static <T> T handleException(Supplier<T> supplier) {
+        try {
+            return supplier.get();
         } catch (EntityNotFoundException ex) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage(), ex);
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        } catch (IllegalStateException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
         }
     }
+
 
 }

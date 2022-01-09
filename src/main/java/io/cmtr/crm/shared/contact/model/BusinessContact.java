@@ -9,6 +9,10 @@ import lombok.experimental.Accessors;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
+/**
+ *
+ * @author Harald Blikø
+ */
 @Getter
 @Setter(AccessLevel.PRIVATE)
 @Accessors(chain = true)
@@ -19,29 +23,77 @@ public class BusinessContact extends AbstractContact {
 
     public static final String DISCRIMINATOR_VALUE = "BUSINESS";
 
-    // Business
+
+
+    /**
+     *
+     */
     private String orgNr = "";
+
+
+
+    /**
+     *
+     */
     private String legalName = "";
+
+
+
+    /**
+     *
+     */
     private String countryCode = "";
+
+
+
+    /**
+     *
+     */
     private String businessName = "";
 
-    private BusinessContact() {
+
+
+    ///**** CONSTRUCTOR ****///
+
+
+
+    protected BusinessContact() {
         super(DISCRIMINATOR_VALUE);
     }
 
+
+
+    ///**** SETTERS ****///
+
+
+
+    /**
+     *
+     * @param source
+     * @return
+     */
     @Override
     public AbstractContact update(AbstractContact source) {
         if (!(source instanceof BusinessContact))
             throw new RuntimeException("Incompatible type");
         super.update(source);
-        BusinessContact src = (BusinessContact) source;
-        return this
+        if (source instanceof BusinessContact) {
+            BusinessContact src = (BusinessContact) source;
+            this
                 .setOrgNr(src.getOrgNr())
                 .setLegalName(src.getLegalName())
                 .setCountryCode(src.getCountryCode())
                 .setBusinessName(src.getBusinessName());
+        }
+        return this;
     }
 
+
+
+    /**
+     *
+     * @return
+     */
     @Override
     public AbstractContact createNewInstance() {
         return new BusinessContact()
@@ -49,7 +101,24 @@ public class BusinessContact extends AbstractContact {
                 .update(this);
     }
 
+
+
+    ///**** FACTORIES ****///
+
+
+
+    /**
+     *
+     * @param email
+     * @param orgNr
+     * @param legalName
+     * @param countryCode
+     * @param businessName
+     * @param address
+     * @return
+     */
     public static BusinessContact factory(
+        String email,
         String orgNr,
         String legalName,
         String countryCode,
@@ -61,7 +130,8 @@ public class BusinessContact extends AbstractContact {
                 .setLegalName(legalName)
                 .setCountryCode(countryCode)
                 .setBusinessName(businessName)
-                .setAddress(address);
+                .setAddress(address)
+                .setEmail(email);
     }
 
 }

@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  *

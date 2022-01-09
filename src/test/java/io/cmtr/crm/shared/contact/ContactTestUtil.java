@@ -7,6 +7,7 @@ public class ContactTestUtil {
     public static PersonContact getPersonContact() {
         return (PersonContact) PersonContact
                 .factory(
+                        "John@doe.com",
                         "John",
                         "Doe",
                         getPostboxAddress()
@@ -17,6 +18,7 @@ public class ContactTestUtil {
     public static BusinessContact getBusinessContact() {
         return (BusinessContact) BusinessContact
                 .factory(
+                        "contact@company.no",
                         "1234",
                         "Company",
                         "NOR",

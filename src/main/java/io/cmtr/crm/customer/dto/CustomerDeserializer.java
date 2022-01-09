@@ -40,18 +40,16 @@ public class CustomerDeserializer extends GenericDeserializer<Customer> {
     @Override
     protected Customer getEntity(JsonNode node) throws IOException {
         val type = getCustomerType(node);
-        val email = getAsStringOrThrowValidationException(node, "email", "E-mail is required");
         val parameters = getCustomerParameters(node.get("parameters"));
         val contact = deserializeSubtree(node.get("customer").toString(), contactDeserializer);
 
         return Supplier.DISCRIMINATOR_VALUE.equals(type)
-                ? null
-                : Customer.factory(type, parameters, contact, email);
+                ? Supplier.factory(parameters, contact)
+                : Customer.factory(type, parameters, contact);
     }
 
     private Map<String, String> getCustomerParameters(JsonNode node) {
         if (node == null) return Collections.emptyMap();
-
         Map<String, String> parameters = new HashMap<>();
         node.fields()
             .forEachRemaining((e) -> parameters.put(e.getKey(), e.getValue().asText()));
@@ -60,7 +58,7 @@ public class CustomerDeserializer extends GenericDeserializer<Customer> {
 
     private String getCustomerType(JsonNode node) {
         String type = node.get("type").textValue().toUpperCase();
-        if (!customerProperties.isType(type))
+        if (!(customerProperties.isType(type) || Supplier.DISCRIMINATOR_VALUE.equals(type)))
             throw new ValidationException(String.format("Illegal customer type '%s'", type));
 
         return type;

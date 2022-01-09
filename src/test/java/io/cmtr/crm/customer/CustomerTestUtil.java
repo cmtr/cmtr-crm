@@ -25,13 +25,14 @@ public class CustomerTestUtil {
                 .factory(
                         "PERSON",
                         Collections.EMPTY_MAP,
-                        ContactTestUtil.getPersonContact(),
-                        "john@email.com"
+                        ContactTestUtil.getPersonContact()
                 )
                 .createNewInstance();
     }
 
     public static BillingAccount getBillingAccount() { ;
-        return BillingAccount.createNewInstance(getCustomer(), e -> e.getType());
+        return BillingAccount
+                .factory(getCustomer(), "PERSON")
+                .createNewInstance();
     }
 }

@@ -63,7 +63,8 @@ public class ContactDeserializer extends GenericDeserializer<AbstractContact> {
     private AbstractContact deserializePersonContact(JsonNode node, AbstractAddress address) {
         val firstName = node.get("firstName").textValue();
         val lastName = node.get("lastName").textValue();
-        return PersonContact.factory(firstName, lastName, address);
+        val email = node.get("email").textValue();
+        return PersonContact.factory(email, firstName, lastName, address);
     }
 
     private AbstractContact deserializeBusinessContact(JsonNode node, AbstractAddress address) {
@@ -71,7 +72,8 @@ public class ContactDeserializer extends GenericDeserializer<AbstractContact> {
         val legalName = node.get("legalName").textValue();
         val countryCode = node.get("countryCode").textValue();
         val businessName = node.get("businessName").textValue();
-        return BusinessContact.factory(orgNr, legalName,countryCode, businessName, address);
+        val email = node.get("email").textValue();
+        return BusinessContact.factory(email, orgNr, legalName,countryCode, businessName, address);
     }
 
 

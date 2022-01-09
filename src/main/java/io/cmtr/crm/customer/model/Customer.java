@@ -287,8 +287,7 @@ public class Customer implements GenericEntity<UUID, Customer> {
     public static Customer factory(
             String type,
             Map<String, String> parameters,
-            AbstractContact customer,
-            String email // TODO Remove
+            AbstractContact customer
     ) {
         return new Customer()
             .setType(type)

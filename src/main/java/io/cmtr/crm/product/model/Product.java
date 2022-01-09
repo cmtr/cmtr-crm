@@ -30,7 +30,7 @@ public class Product implements GenericEntity<UUID, Product> {
 
     private List<ProductFeature> features;
 
-    // private List<Price> prices;
+    // private List<AbstractPrice> prices;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

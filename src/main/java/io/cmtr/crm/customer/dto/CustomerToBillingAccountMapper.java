@@ -2,6 +2,7 @@ package io.cmtr.crm.customer.dto;
 
 import io.cmtr.crm.customer.config.BillingProperties;
 import io.cmtr.crm.customer.model.Customer;
+import io.cmtr.crm.customer.model.Supplier;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ public class CustomerToBillingAccountMapper implements ICustomerToBillingAccount
 
     public String getBillingAccountType(Customer customer) {
         val customerType = customer.getType();
+        if (customer.getType().equals(Supplier.DISCRIMINATOR_VALUE)) return "BUSINESS";
+
         return billingProperties
                 .getCustomer()
                 .getTypeMapping()

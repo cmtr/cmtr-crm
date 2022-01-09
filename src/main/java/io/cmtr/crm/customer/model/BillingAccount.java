@@ -201,10 +201,8 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
             this.state = state;
             return this;
         } else {
-            throw new IllegalBillingAccountStateException(
-                    String.format("Cannot transition from state %s to %s.", this.state, state),
-                    this
-            );
+            String message = String.format("Cannot transition from state %s to %s.", this.state, state);
+            throw new IllegalBillingAccountStateException(message, this);
         }
     }
 
@@ -217,8 +215,10 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
      */
     @Override
     public BillingAccount update(BillingAccount source) {
+        this.setSyncOwnerWithCustomer(source.syncOwnerWithCustomer);
+        this.setSyncRecipientWithOwner(source.syncRecipientWithOwner);
         this.owner.update(syncOwnerWithCustomer ? this.customer.getCustomer() : source.getOwner());
-        this.recipient.update(syncRecipientWithOwner ? source.getOwner() : source.getRecipient());
+        this.recipient.update(syncRecipientWithOwner ? this.getOwner() : source.getRecipient());
         return this
                 .setParameters(source.getParameters());
     }
@@ -242,23 +242,6 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
                 .setOwner(this.getOwner() == null ? null : this.getOwner().createNewInstance())
                 .setRecipient(this.getRecipient() == null ? null : this.getRecipient().createNewInstance())
                 .update(this);
-    }
-
-
-
-    /**
-     *
-     * @param customer
-     * @param customerToBillingAccountMapper
-     * @return
-     */
-    public static BillingAccount createNewInstance(Customer customer, ICustomerToBillingAccountMapper customerToBillingAccountMapper) {
-        return new BillingAccount()
-                .setType(customerToBillingAccountMapper.getBillingAccountType(customer))
-                .setCustomer(customer)
-                .setOwner(customer.getCustomer().createNewInstance())
-                .setRecipient(customer.getCustomer().createNewInstance())
-                .createNewInstance();
     }
 
 
@@ -304,6 +287,24 @@ public class BillingAccount implements GenericEntity<UUID, BillingAccount> {
                 .setOwner(owner)
                 .setRecipient(recipient)
                 .setParameters(parameters);
+    }
+
+
+    /**
+     *
+     * @param customer
+     * @param billingAccountType
+     * @return
+     */
+    public static BillingAccount factory(
+            Customer customer,
+            String billingAccountType
+    ) {
+        return new BillingAccount()
+                .setType(billingAccountType)
+                .setCustomer(customer)
+                .setOwner(customer.getCustomer())
+                .setRecipient(customer.getCustomer());
     }
 
 }

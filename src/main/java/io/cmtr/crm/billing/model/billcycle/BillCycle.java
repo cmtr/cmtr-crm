@@ -41,7 +41,12 @@ public abstract class BillCycle implements GenericEntity<UUID, BillCycle> {
      *
      */
     @NotEmpty
-    @Column(name = "bill_cycle_type")
+    @Column(
+            name = "bill_cycle_type",
+            insertable = false,
+            updatable = false,
+            nullable = false
+    )
     private String type;
 
 

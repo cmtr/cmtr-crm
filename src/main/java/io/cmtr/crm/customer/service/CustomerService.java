@@ -13,11 +13,21 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
+/**
+ *
+ * @author Harald Blikø
+ */
 @Service
 public class CustomerService extends GenericService<UUID, Customer> {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
+
+    /**
+     *
+     * @param repository
+     * @param applicationEventPublisher
+     */
     public CustomerService(
             @Autowired CustomerRepository repository,
             @Autowired ApplicationEventPublisher applicationEventPublisher
@@ -27,6 +37,12 @@ public class CustomerService extends GenericService<UUID, Customer> {
     }
 
 
+    /**
+     *
+     * @param id
+     * @param barred
+     * @return
+     */
     @Transactional
     public Customer bar(UUID id, boolean barred) {
         Customer dbDomain = get(id);
@@ -37,9 +53,19 @@ public class CustomerService extends GenericService<UUID, Customer> {
                 .save(dbDomain);
     }
 
+
+
+    /**
+     *
+     * @param current
+     * @param prev
+     * @param type
+     */
     @Override
     public void publish(Customer current, Customer prev, CrudEventType type) {
         super.publish(current, prev, type);
         applicationEventPublisher.publishEvent(new CustomerEvent(current, prev, type));
     }
+
+
 }

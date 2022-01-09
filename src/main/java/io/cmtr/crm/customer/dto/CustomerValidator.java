@@ -2,6 +2,7 @@ package io.cmtr.crm.customer.dto;
 
 import io.cmtr.crm.customer.config.CustomerProperties;
 import io.cmtr.crm.customer.model.Customer;
+import io.cmtr.crm.customer.model.Supplier;
 import io.cmtr.crm.shared.generic.dto.EntityDtoValidator;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,13 @@ public class CustomerValidator implements EntityDtoValidator<Customer> {
     public boolean isValidCustomerAndContactType(Customer customer) {
         val customerType = customer.getType().toUpperCase();
         val contactType = customer.getCustomer().getType().toUpperCase();
+
+        if (customerType.equals(Supplier.DISCRIMINATOR_VALUE)) {
+            // TODO - Validate Contact Type
+            return true;
+        }
+
+
         return customerProperties
                 .getContact()
                 .getTypeMapping()
