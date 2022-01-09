@@ -40,8 +40,7 @@ public class BillingAccountDeserializer extends GenericDeserializer<BillingAccou
         val owner = deserializeSubtree(node.get("owner").toString(), contactDeserializer);
         val recipient = deserializeSubtree(node.get("recipient").toString(), contactDeserializer);
         val parameters = getBillingAccountParameters(node);
-        return BillingAccount
-                .factory(type, customer, owner, recipient, parameters);
+        return BillingAccount.factory(type, customer, owner, recipient, parameters);
     }
 
     private String getBillingAccountType(JsonNode node) {
@@ -51,9 +50,7 @@ public class BillingAccountDeserializer extends GenericDeserializer<BillingAccou
 
     private Map<String, String> getBillingAccountParameters(JsonNode node) {
         Map<String, String> parameters = new HashMap<>();
-        node
-                .fields()
-                .forEachRemaining((e) -> parameters.put(e.getKey(), e.getValue().asText()));
+        node.fields().forEachRemaining((e) -> parameters.put(e.getKey(), e.getValue().asText()));
         return parameters;
     }
 

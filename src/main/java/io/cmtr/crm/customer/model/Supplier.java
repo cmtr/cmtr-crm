@@ -11,6 +11,15 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
+/**
+ * Supplier
+ *
+ * Offers services and products to customers
+ *
+ * The Supplier is a Global Customer Entity.
+ *
+ * @author Harald Blikø
+ */
 @Getter
 @Setter(AccessLevel.PROTECTED)
 @Accessors(chain = true)
@@ -20,39 +29,65 @@ public class Supplier extends Customer {
 
     public static final String DISCRIMINATOR_VALUE = "SUPPLIER";
 
+
+
+    ///**** CONSTRUCTOR ****///
+
+
+
+    /**
+     *
+     */
     protected  Supplier() {
         super(DISCRIMINATOR_VALUE);
     }
 
+
+
+    ///**** SETTERS ****///
+
+
+
     /**
      *
-     * Type cannot be modified for a supplier
-     *
-     * @param type - string any value
-     * @return Supplier
+     * @param source
+     * @return
      */
-    @Override
-    protected Customer setType(@NotNull(message = "Customer type cannot be null") String type) {
-        return super.setType(DISCRIMINATOR_VALUE);
-    }
-
     @Override
     public Customer update(Customer source) {
         return super.update(source);
     }
 
+
+
+    /**
+     *
+     * @return
+     */
     @Override
     public Customer createNewInstance() {
         return super.createNewInstance();
     }
 
+
+
+    ///**** FACTORIES ****///
+
+
+
+    /**
+     *
+     * @param parameters
+     * @param customer
+     * @return
+     */
     public static Supplier factory(
             Map<String, String> parameters,
-            AbstractContact customer,
-            String email
+            AbstractContact customer
     ) {
         return (Supplier) new Supplier()
             .setParameters(parameters)
             .setCustomer(customer);
     }
+
 }

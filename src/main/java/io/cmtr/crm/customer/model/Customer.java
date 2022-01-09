@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 /**
  * Customer
  *
+ * Purchase products or services from Suppliers.
+ *
+ * Customer is a Global Entity.
+ *
  * @author Harald Blikø
  */
 @Getter
@@ -80,7 +84,8 @@ public class Customer implements GenericEntity<UUID, Customer> {
      *
      */
     @OneToMany(
-            fetch = FetchType.EAGER
+            fetch = FetchType.EAGER,
+            orphanRemoval = true
     )
     @JsonIgnore
     private Set<BillingAccount> billingAccounts = new HashSet<>();
@@ -176,19 +181,6 @@ public class Customer implements GenericEntity<UUID, Customer> {
 
 
     ///**** SETTERS ****∕∕∕
-
-
-
-    /**
-     *
-     * @param billingAccount
-     * @return
-     */
-    public Customer addBillingAccount(BillingAccount billingAccount) {
-        this.billingAccounts.add(billingAccount);
-        return this;
-    }
-
 
 
     /**
