@@ -8,6 +8,8 @@ import java.util.UUID;
 
 /**
  *
+ * BillCycle Service
+ *
  * @author Harald Blikø
  *
  */

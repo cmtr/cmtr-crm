@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class BillRunServiceImpl extends GenericService<Long, BillRun> implements BillRunService {
 
+
+
     /**
      *
      */
@@ -58,6 +60,8 @@ public class BillRunServiceImpl extends GenericService<Long, BillRun> implements
         }
 
     }
+
+
 
     /**
      *

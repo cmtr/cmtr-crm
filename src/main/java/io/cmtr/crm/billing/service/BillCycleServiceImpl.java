@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 /**
+ * BillCycle Service Implementation
  *
+ * @author Harald Blikø
  */
 @Service
 public class BillCycleServiceImpl extends GenericService<UUID, BillCycle> implements BillCycleService {

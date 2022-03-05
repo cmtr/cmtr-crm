@@ -7,7 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 /**
+ * BillCylce Repository
  *
+ * @author Harald Blikø
  */
 @Repository
 public interface BillCycleRepository extends GenericRepository<UUID, BillCycle> {

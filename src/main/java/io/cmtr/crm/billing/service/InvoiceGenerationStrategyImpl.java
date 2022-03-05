@@ -6,9 +6,12 @@ import io.cmtr.crm.billing.model.invoice.InvoiceLineItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
+ * Invoice Generation Strategy Implementation
+ *
  *
  * @author Harald Blikø
  */
@@ -83,7 +86,7 @@ public class InvoiceGenerationStrategyImpl implements InvoiceInstantiationStrate
                 .getLineItems(
                         invoice.getSupplier(),
                         invoice.getBillingAccount(),
-                        false,
+                        Optional.of(false),
                         invoice.getBillRun().getPeriodEnd()
                 );
         invoice.addInvoiceLineItem(lineItems);
