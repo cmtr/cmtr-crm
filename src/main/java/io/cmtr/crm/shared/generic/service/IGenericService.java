@@ -24,5 +24,5 @@ public interface IGenericService<R, T extends GenericEntity<R, T>> {
     @Transactional
     void delete(R id);
 
-    void publish(T current, T prev, CrudEventType type);
+    // void publish(T current, T prev, CrudEventType type);
 }

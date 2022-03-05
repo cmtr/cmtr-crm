@@ -149,8 +149,7 @@ public abstract class GenericService<R, T extends GenericEntity<R, T>> implement
      * @param prev
      * @param type
      */
-    @Override
-    public void publish(T current, T prev, CrudEventType type) {
+    protected void publish(T current, T prev, CrudEventType type) {
 
     }
 
