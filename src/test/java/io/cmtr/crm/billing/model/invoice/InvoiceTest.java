@@ -86,7 +86,7 @@ class InvoiceTest {
         @DisplayName("when a charge is added to a invoice then")
         void withCharge() {
             invoice.addDocumentLevelAllowanceCharge(documentLevelCharge);
-            assertEquals(Invoice.State.PREPARE, invoice.getState());
+            assertEquals(Invoice.State.IN_PROGRESS, invoice.getState());
             BigDecimal net = charge.setScale(IAmount.PRECISION, IAmount.ROUNDING_MODE);
             assertEquals(net, invoice.getAmount(), "Amount - Net Amount");
             assertEquals(net, invoice.getTotalNetAmount(), "Net Amount");

@@ -2,6 +2,7 @@ package io.cmtr.crm.mediation.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.cmtr.crm.order.model.Offer;
+import io.cmtr.crm.order.model.OfferFeature;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -13,7 +14,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -43,13 +46,6 @@ public class Mediation implements GenericEntity<UUID, Mediation> {
      *
      */
     @NotNull
-    private Offer offer;
-
-
-    /**
-     *
-     */
-    @NotNull
     private State state;
 
 
@@ -70,7 +66,7 @@ public class Mediation implements GenericEntity<UUID, Mediation> {
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL
     )
-    private List<Usage> usages;
+    private List<Usage> usages = new LinkedList<>();
 
 
 
@@ -124,5 +120,17 @@ public class Mediation implements GenericEntity<UUID, Mediation> {
 
     ///**** FACTORIES ****///
 
-
+    /**
+     *
+     * @param offer
+     * @param unit
+     * @return
+     */
+    public static Mediation factory(
+        Offer offer,
+        String unit
+    ) {
+        return new Mediation()
+                .setUnit(unit);
+    }
 }

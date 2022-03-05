@@ -14,4 +14,5 @@ public class PriceController extends GenericRestController<Long, AbstractPrice> 
         super(service);
     }
 
+
 }

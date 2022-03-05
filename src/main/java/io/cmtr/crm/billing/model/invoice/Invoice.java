@@ -2,6 +2,7 @@ package io.cmtr.crm.billing.model.invoice;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.cmtr.crm.billing.model.billcycle.BillRun;
 import io.cmtr.crm.customer.model.BillingAccount;
 import io.cmtr.crm.customer.model.Supplier;
 import io.cmtr.crm.shared.billing.model.*;
@@ -11,6 +12,7 @@ import lombok.*;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
@@ -51,6 +53,12 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     @NotNull(message = "State cannot be null")
     private State state;
 
+
+    /**
+     *
+     */
+    @NotEmpty(message = "Invoice type cannot be empty")
+    private String type;
 
 
     /**
@@ -136,6 +144,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
 
     /**
      *
+     *
      * Mapped by the Invoice to Allowance / Charge Mapping Table in preparation
      */
     @JsonIgnore
@@ -150,13 +159,30 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
             inverseJoinColumns = { @JoinColumn(name = "allowance_charge_id")}
     )
     private Set<AllowanceCharge> allowanceCharges = new HashSet<>();
+    // Todo - shoudl have one mappling table and one OneToOne relationship from the AllowanceCharge
+
+
+    /**
+     * Todo - change to generationTime
+     * Todo - create metod to get Issue date
+     * Todo - set due date
+     * Todo - set payment date
+     */
+    private ZonedDateTime issueDate;
 
 
 
     /**
-     *
+     * A Bill Run required
      */
-    private ZonedDateTime issueDate;
+    @ManyToOne(
+            fetch = FetchType.LAZY,
+            optional = false
+    )
+    private BillRun billRun;
+
+
+
 
     ///**** GETTERS ****///
 
@@ -292,6 +318,11 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
         return this;
     }
 
+    public Invoice addInvoiceLineItem(@NotNull Collection<InvoiceLineItem> lineItems) {
+        lineItems.forEach(this::addInvoiceLineItem);
+        return this;
+    }
+
     /**
      *
      * @param lineItem
@@ -402,6 +433,28 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
     }
 
 
+    /**
+     *
+     *
+     * @param billRun
+     * @param billingAccount
+     * @return
+     */
+    public static Invoice factory(BillRun billRun, BillingAccount billingAccount) {
+        return new Invoice()
+                .setBillRun(billRun)
+                .setSupplier(billRun.getSupplier())
+                .setBillingAccount(billingAccount)
+                .setType(billRun.getType());
+    }
+
+
+
+    /**
+     *
+     * @param id
+     * @return
+     */
     public static Invoice factory(Long id) {
         return new Invoice()
                 .setId(id);
@@ -417,7 +470,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     public enum State {
         NEW,
-        PREPARE,
+        IN_PROGRESS,
         COMPLETE,
         CANCELLED,
         SIMULATED
@@ -434,7 +487,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      */
     private void setStateToPrepareIfNew() {
         if (this.state == State.NEW)
-            this.setState(State.PREPARE);
+            this.setState(State.IN_PROGRESS);
     }
 
 
@@ -445,7 +498,7 @@ public class Invoice implements GenericEntity<Long, Invoice>, IInvoice {
      * @param message - thrown with IllegalSateException
      */
     private void inPrepareOrThrow(String message) {
-        if (this.state != State.PREPARE)
+        if (this.state != State.IN_PROGRESS)
             throw new IllegalStateException(message);
     }
 

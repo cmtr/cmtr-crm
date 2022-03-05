@@ -129,7 +129,7 @@ public abstract class Usage implements IUsage, GenericEntity<Long, Usage> {
     enum State {
         NEW,
         ACTIVE,
-        COMPLETE,
-        ALLOCATED
+        CORRECTED,
+        DELETED
     }
 }

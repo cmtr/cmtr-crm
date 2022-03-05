@@ -98,13 +98,22 @@ public class InvoiceLineItem extends AllowanceCharge implements IInvoiceLineItem
 
 
     /**
-     *
+     * Default private constructor
      */
-    protected InvoiceLineItem() {
+    private InvoiceLineItem() {
         super(DISCRIMINATOR_VALUE);
     }
 
 
+
+    /**
+     * Protected constructor for inheritance
+     *
+     * @param type String - DISCRIMINATOR VALUE
+     */
+    protected InvoiceLineItem(String type) {
+        super(type);
+    }
 
     ///**** GETTERS ****∕∕∕
 

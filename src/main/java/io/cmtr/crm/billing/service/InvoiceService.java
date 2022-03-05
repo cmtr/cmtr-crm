@@ -1,21 +1,16 @@
 package io.cmtr.crm.billing.service;
 
 import io.cmtr.crm.billing.model.invoice.Invoice;
-import io.cmtr.crm.billing.repository.InvoiceRepository;
-import io.cmtr.crm.shared.generic.service.GenericService;
-import org.springframework.stereotype.Service;
+import io.cmtr.crm.shared.generic.service.IGenericService;
 
+/**
+ * Invoice Service Interface
+ *
+ * @author Harald Blikø
+ */
+public interface InvoiceService extends IGenericService<Long, Invoice> {
 
+    Invoice get(Long id);
 
-@Service
-public class InvoiceService extends GenericService<Long, Invoice> implements IInvoiceService {
-
-    public InvoiceService(InvoiceRepository repository) {
-        super(repository);
-    }
-
-    @Override
-    public Invoice save(Invoice invoice) {
-        return null;
-    }
+    Invoice save(Invoice invoice);
 }

@@ -2,52 +2,118 @@ package io.cmtr.crm.order.model;
 
 import io.cmtr.crm.customer.model.BillingAccount;
 import io.cmtr.crm.shared.generic.model.GenericEntity;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
+/**
+ * Abstract Order
+ *
+ * @author Harald Blikø
+ */
 @Getter
-@Setter
+@Setter(AccessLevel.PROTECTED)
 @EqualsAndHashCode
 @Accessors(chain = true)
-// @Entity
-@NoArgsConstructor
-public class Order implements GenericEntity<Long, Order> {
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class Order implements GenericEntity<Long, Order> {
 
+
+
+    /**
+     *
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
+    /**
+     *
+     */
     @NotNull
+    @ManyToOne(
+            fetch = FetchType.EAGER,
+            optional = false
+    )
     private BillingAccount billingAccount;
 
+
+
+    /**
+     *
+     */
+    private String type;
+
+
+
+    /**
+     *
+     */
+    public ZonedDateTime at;
+
+
+
+    /**
+     *
+     */
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+
+
+    /**
+     *
+     */
     @UpdateTimestamp
     private LocalDateTime modifiedAt;
 
+
+
+    ///**** CONSTRUCTOR *****///
+
+
+
+    /**
+     *
+     * @param type
+     */
+    protected Order(String type) {
+        this.type = type;
+    }
+
+
+    ///**** GETTERS *****///
+
+    ///**** SETTERS ****///
+
+
+
+    /**
+     *
+     * @param source
+     * @return
+     */
     @Override
     public Order update(Order source) {
         return this;
     }
 
-    @Override
-    public Order createNewInstance() {
-        return new Order()
-                .update(this);
-    }
 
+
+    ///**** STATIC RESOURCES ****///
+
+
+
+    /**
+     *
+     */
     public enum State {
         NEW,
         IN_PROGRESS,

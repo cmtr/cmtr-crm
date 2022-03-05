@@ -1,0 +1,92 @@
+@startuml
+actor "Billing\nOperator" as bo
+participant "BillRun\nService" as brs
+participant "BillRun\nEvent\nHandler" as bre
+entity "BillRun"      as br
+queue "BillRun\nQueue"       as brq
+entity "Invoice" as i
+participant "Invoice\nService" as is
+participant "Invoice\nInstantiation\nStrategy" as iis
+participant "Invoice\nProcessing\nStrategy" as ips
+participant "Invoice\nFinalization\nStrategy" as ifs
+queue       "Invoice\nQueue"       as iq
+entity "AllowanceCharge" as ac
+participant "Allowance\nCharge\nService" as acs
+database    Database    as db
+bo -> brs : Start BillRun
+brs -> br : BillRunDAO factory
+br -> brs : Return BillRunDAO
+brs -> br : BillRun createNewIntance
+br -> brs : Return BillRun
+brs -> db : Save BillRun to Database
+db -> brs : Return BillRun
+brs -> bo : Return BillRun
+brs -> brq : Publish BillRun Event
+
+bre -> brq : Pull Queue
+brq -> bre : Return BillRun Event
+bre -> iis : Instanciate Invoices
+iis -> br : Get BillingAccounts
+
+group forEach BillingAccount [Create Invoice per BillingAccount]
+iis -> i : InvoiceDAO factory
+i -> iis : Return InvoiceDAO
+iis -> is : Create Invoice
+is -> i : Invoice createNewInstance
+i -> is : Return Invoice
+is -> db : Save Invoice to Database
+db -> is : Return Invoice
+is -> iq : Publish Invoice Event
+end
+
+group forEach Invoice [add Allowances & Chages]
+bre -> iq : Pull Queue
+iq -> bre : Return Invoice Event
+bre -> ips : process Invoice
+ips -> is : Get Invoice
+is -> db : Get Invoice from Database
+db -> is : Return Invoice
+is -> ips : Return Invoice
+ips -> acs : Get AllowanceCharges
+acs -> db : Get AllowanceCharges
+db -> acs : Return AllowanceCharges
+acs -> ips : Return AllowanceCharges
+ips -> i : Add AllowanceCharges
+ips -> is : Save Invoice
+is -> db : Save Invoice
+db -> is : Return Invoice
+is -> ips : Return Invoice
+is -> iq : Publish Invoice Event
+End
+
+group forEach Invoice [finalize Invoice]
+bre -> iq : Pull Queue
+iq -> bre : Return Invoice Event
+bre -> ifs : finalize Invoice
+ifs -> is : Get Invoice
+is -> db : Get Invoice from Database
+db -> is : Return Invoice
+is -> ifs : Return Invoice
+ifs -> i : finalize Invoice
+i -> ac : finalize Allowance Charge
+ifs -> is : Save Invoice
+is -> db : Save Invoice
+db -> is : Return Invoice
+is -> ifs : Return Invoice
+is -> iq : Publish Invoice Event
+end
+
+bre -> iq : Pull Queue
+bre -> brs : Get BillRun
+brs -> db : Get BillRun
+db -> brs : Return BillRun
+brs -> bre : Return BillRun
+bre -> br : complete BillRun
+br -> bre : Return BillRun
+bre -> brs : Save BillRun
+brs -> db : Save BillRun
+db -> brs : Return BillRun
+brs -> bre : Return BillRun
+brs -> brq : Publish BillRun Event
+
+@enduml
